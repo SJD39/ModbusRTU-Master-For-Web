@@ -1,0 +1,35 @@
+.dropDownBox{
+    display: inline-block;
+    position: relative;
+
+    width: max-content;
+}
+
+.dropDownUl{
+    position: absolute;
+    left: -10px;
+    display: none;
+    width: max-content;
+
+    background-color: #39c5bb;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.dropDownUl li{
+    padding: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    transition: all 0.3s;
+
+    border-bottom: #ffffff39 2px solid;
+}
+
+.dropDownUl li:hover{
+    background-color: #fff;
+    color: #39c5bb;
+}
+
+.dropDownUl li:last-child{
+    border-bottom: none;
+}
