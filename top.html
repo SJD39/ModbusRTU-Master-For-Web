@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="./css/top.css">
+<div class="top_shell shell">
+    <div class="top">
+        <div class="top_content">
+            <ul class="top_ul">
+                <li><single-choice id="runMode" value="1" options='["运行","编辑"]'></single-choice></li>
+            </ul>
+            <ul class="top_ul">
+                <li>波特率：<drop-down id="baudRateDom" value="0" options='["9600","19200","115200"]'></drop-down></li>
+                <li>数据位：<drop-down id="dataBitsDom" value="1" options='["7","8"]'></drop-down></li>
+                <li>停止位：<drop-down id="stopBitsDom" value="0" options='["1","2"]'></drop-down></li>
+                <li>奇偶校验：<drop-down id="parityDom" value="0" options='["none","even","odd"]'></drop-down></li>
+                <li><button class="buttonWhite" onclick="openSerial()">打开串口</button></li>
+                <li>刷新率：<drop-down id="refreshRate" value="1" options='["100","500","1000"]'></drop-down>ms</li>
+            </ul>
+            <ul class="top_ul">
+                <li>保存至cookie</li>
+                <li>保存至文件</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    var master = new ModBusRTUMaster();
+
+    async function openSerial() {
+        try {
+            master.port = await navigator.serial.requestPort();
+        } catch {
+            popupTip.innerText = "请选择串口！";
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return;
+        }
+
+        await master.port.open({
+            baudRate: Number(baudRateDom.getOption()),
+            dataBits: Number(dataBitsDom.getOption()),
+            stopBits: Number(stopBitsDom.getOption()),
+            parity: parityDom.getOption(),
+            bufferSize: 1024,
+            flowControl: "none"
+        });
+    }
+
+    var timer;
+    runMode.clickCallback = function () {
+        if (runMode.value == 0) {
+            clickMenuBox.style.display = 'none';
+            timer = setInterval(async function () {
+                coilShows = document.getElementsByClassName('coilShowBox');
+                for (let i = 0; i < coilShows.length; i++) {
+                    coilShows[i].innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
+                }
+            }, Number(refreshRate.getOption()));
+        } else if (runMode.value == 1) {
+            clearInterval(timer);
+        }
+    }
+</script>

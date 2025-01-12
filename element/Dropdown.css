@@ -8,7 +8,6 @@
 .dropDownUl{
     position: absolute;
     left: -10px;
-    display: none;
     width: max-content;
 
     background-color: #39c5bb;

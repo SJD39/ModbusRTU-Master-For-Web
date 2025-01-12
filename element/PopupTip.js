@@ -1,22 +1,22 @@
 class PopupTip extends HTMLElement{
-    static observedAttributes = ["duration"];
     constructor(){
         super();
     }
 
     connectedCallback(){
         this.className = 'popupTipBox';
+        this.duration = 1000;
     }
 
     popup(){
         this.style.display = 'block';
-        this.style.animation = 'popupTipPopup 0.5s ease-out';
+        this.style.animation = 'popupTipPopup 0.5s ease-out forwards';
         setTimeout(() => {
-            this.style.animation = 'popupTipDieout 0.5s ease-out';
+            this.style.animation = 'popupTipDieout 0.5s ease-out forwards';
             setTimeout(() => {
                 this.style.display = 'none';
             }, 500);
-        }, this.getAttribute('duration'));
+        }, this.duration);
     }
 }
 

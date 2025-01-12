@@ -6,11 +6,8 @@ class SingleChoice extends HTMLElement {
     }
 
     connectedCallback() {
-        if(this.hasAttribute("options")){
-            this.options = JSON.parse(this.getAttribute("options"));
-        }else{
-            return;
-        }
+        this.clickCallback = function(){};
+        this.options = JSON.parse(this.getAttribute("options"));
 
         this.liElements = [];
         this.radioUl = document.createElement('ul');
@@ -25,6 +22,7 @@ class SingleChoice extends HTMLElement {
 
             li.addEventListener('click', () => {
                 this.setValue(index);
+                this.clickCallback();
             });
 
             this.liElements.push(li);
@@ -50,6 +48,10 @@ class SingleChoice extends HTMLElement {
 
     getValue() {
         return this.value;
+    }
+
+    getOption(){
+        return this.options[this.value];
     }
 }
 

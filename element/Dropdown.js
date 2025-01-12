@@ -6,11 +6,7 @@ class Dropdown extends HTMLElement {
     }
 
     connectedCallback() {
-        if(this.hasAttribute("options")){
-            this.options = JSON.parse(this.getAttribute("options"));
-        }else{
-            return;
-        }
+        this.options = JSON.parse(this.getAttribute("options"));
         
         this.dropDownViewBox = document.createElement('div');
         this.dropDownView = document.createElement('span');
@@ -20,6 +16,7 @@ class Dropdown extends HTMLElement {
         this.dropDownViewBox.className = 'dropDownViewBox';
         this.dropDownView.className = 'dropDownView';
         this.dropDownUl.className = 'dropDownUl';
+        this.dropDownUl.style.display = 'none';
 
         this.options.forEach((option, index) => {
             let li = document.createElement('li');
@@ -71,6 +68,10 @@ class Dropdown extends HTMLElement {
 
     getValue() {
         return this.value;
+    }
+
+    getOption(){
+        return this.options[this.value];
     }
 }
 

@@ -15,6 +15,10 @@ li {
     list-style: none;
 }
 
+.shell{
+    padding: 10px;
+}
+
 .buttonWhite {
     padding: 8px;
 
@@ -23,4 +27,10 @@ li {
 
     border: #fff 1px solid;
     border-radius: 9px;
+}
+
+.buttonWhite:hover{
+    background-color: #fff;
+    color: #39c5bb;
+    border: #39c5bb 1px solid;
 }

@@ -1,0 +1,9 @@
+.coilShowBox{
+    display: inline-block;
+    position: fixed;
+    
+    padding: 6px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    color: #39c5bb;
+}

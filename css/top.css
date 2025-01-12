@@ -1,4 +1,6 @@
 .top {
+    border-radius: 9px;
+
     width: 100%;
     height: 60px;
 
@@ -25,6 +27,6 @@
 }
 
 .top_ul li{
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 12px;
+    margin-right: 12px;
 }
