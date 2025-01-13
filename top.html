@@ -46,15 +46,23 @@
 
     var timer;
     runMode.clickCallback = function () {
+        let coilShows = document.getElementsByClassName('coilShowBox');
         if (runMode.value == 0) {
             clickMenuBox.style.display = 'none';
+            
+            for (let i = 0; i < coilShows.length; i++) {
+                coilShows[i].toRunMode();
+            }
+
             timer = setInterval(async function () {
-                coilShows = document.getElementsByClassName('coilShowBox');
                 for (let i = 0; i < coilShows.length; i++) {
-                    coilShows[i].innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
+                    coilShows[i].coilShowValue.innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
                 }
             }, Number(refreshRate.getOption()));
         } else if (runMode.value == 1) {
+            for (let i = 0; i < coilShows.length; i++) {
+                coilShows[i].toEditorMode();
+            }
             clearInterval(timer);
         }
     }

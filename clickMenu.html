@@ -1,10 +1,11 @@
 <div id="clickMenuBox" style="display: none;">
     <ul>
         <li>添加文本</li>
-        <li id="addCoilShowLi">添加布尔显示</li>
-        <li>添加布尔输入</li>
-        <li>添加数值显示</li>
-        <li>添加数值输入</li>
+        <li id="addCoilShowLi">添加线圈显示</li>
+        <li>添加线圈输入</li>
+        <li>添加输入寄存器显示</li>
+        <li>添加保持寄存器显示</li>
+        <li>添加寄存器输入</li>
     </ul>
 </div>
 
@@ -24,6 +25,8 @@
     });
 
     addCoilShowLi.addEventListener("click", function () {
+        clickMenuBox.style.display = 'none';
+
         let station = window.prompt("请输入站号", "1");
         if (station == null || station == "" || isNaN(Number(station))) {
             popupTip.innerText = "请正确输入站号";
@@ -43,13 +46,13 @@
             addr = Number(addr);
         }
 
+        
         let coilShow = document.createElement('coil-show');
-        console.log(station);
         coilShow.station = station;
-        console.log(coilShow.station);
         coilShow.addr = addr;
         coilShow.style.left = clickMenuBox.style.left;
         coilShow.style.top = clickMenuBox.style.top;
+        
         body_content.append(coilShow);
     })
 </script>
