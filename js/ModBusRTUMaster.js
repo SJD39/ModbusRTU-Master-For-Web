@@ -20,7 +20,13 @@ class ModBusRTUMaster {
         writer.releaseLock();
 
         // 读返回值
-        let reader = this.port.readable.getReader();
+        let reader;
+        try {
+            reader = this.port.readable.getReader();
+        } catch (error) {
+            return;
+        }
+
         let readValues = [];
         while (true) {
             const { value, done } = await reader.read();
@@ -177,7 +183,7 @@ class ModBusRTUMaster {
     }
 
     // 06 写单个保持寄存器
-    async WriteSingleRegister(id, addr, value){
+    async WriteSingleRegister(id, addr, value) {
         let addrH = addr >> 8;
         let addrL = addr & 0xFFFF;
         let valueH = value >> 8;

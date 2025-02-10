@@ -4,6 +4,7 @@
         <div class="top_content">
             <ul class="top_ul">
                 <li><single-choice id="runMode" value="1" options='["运行","编辑"]'></single-choice></li>
+                <li>清空画面</li>
             </ul>
             <ul class="top_ul">
                 <li>波特率：<drop-down id="baudRateDom" value="0" options='["9600","19200","115200"]'></drop-down></li>
@@ -14,8 +15,10 @@
                 <li>刷新率：<drop-down id="refreshRate" value="1" options='["100","500","1000"]'></drop-down>ms</li>
             </ul>
             <ul class="top_ul">
-                <li>保存至cookie</li>
+                <li>保存至Cookie</li>
+                <li>从Cookie读取</li>
                 <li>保存至文件</li>
+                <li>从文件读取</li>
             </ul>
         </div>
     </div>
@@ -48,14 +51,18 @@
     runMode.clickCallback = function () {
         let coilShows = document.getElementsByClassName('coilShowBox');
         let textShows = document.getElementsByClassName('textShow');
+        let coilCtrls = document.getElementsByClassName('coilCtrlBox');
         if (runMode.value == 0) {
             clickMenuBox.style.display = 'none';
-            
+
             for (let i = 0; i < coilShows.length; i++) {
                 coilShows[i].toRunMode();
             }
             for (let i = 0; i < textShows.length; i++) {
                 textShows[i].toRunMode();
+            }
+            for (let i = 0; i < coilCtrls.length; i++) {
+                coilCtrls[i].toRunMode();
             }
 
             timer = setInterval(async function () {
@@ -69,6 +76,9 @@
             }
             for (let i = 0; i < textShows.length; i++) {
                 textShows[i].toEditorMode();
+            }
+            for (let i = 0; i < coilCtrls.length; i++) {
+                coilCtrls[i].toEditorMode();
             }
             clearInterval(timer);
         }
