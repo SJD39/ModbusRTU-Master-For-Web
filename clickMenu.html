@@ -1,6 +1,7 @@
 <div id="clickMenuBox" style="display: none;">
     <ul>
-        <li>添加文本</li>
+        
+        <li id="addStaticText">添加静态文本</li>
         <li id="addCoilShowLi">添加线圈显示</li>
         <li>添加线圈输入</li>
         <li>添加输入寄存器显示</li>
@@ -24,6 +25,7 @@
         }
     });
 
+    // 添加线圈显示
     addCoilShowLi.addEventListener("click", function () {
         clickMenuBox.style.display = 'none';
 
@@ -55,6 +57,28 @@
         
         body_content.append(coilShow);
     })
+
+    // 添加静态文字
+    addStaticText.addEventListener('click', function(){
+        clickMenuBox.style.display = 'none';
+
+        let text = window.prompt("请输入文本", "Text");
+        if (text == null || text == "") {
+            popupTip.innerText = "文本不能为空！";
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return;
+        }
+
+        let textShow = document.createElement('text-show');
+        textShow.style.left = clickMenuBox.style.left;
+        textShow.style.top = clickMenuBox.style.top;
+
+        body_content.append(textShow);
+        textShow.setText(text);
+    })
+
+
 </script>
 
 <style>

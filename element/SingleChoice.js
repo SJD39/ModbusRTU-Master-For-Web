@@ -1,6 +1,4 @@
 class SingleChoice extends HTMLElement {
-    static observedAttributes = ["value", "options"];
-
     constructor() {
         super();
     }

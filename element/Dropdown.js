@@ -1,6 +1,4 @@
 class Dropdown extends HTMLElement {
-    static observedAttributes = ["value", "options"];
-
     constructor() {
         super();
     }

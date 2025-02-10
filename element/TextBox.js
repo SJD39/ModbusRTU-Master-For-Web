@@ -1,29 +1,23 @@
-class CoilShow extends HTMLElement {
+class TextShow extends HTMLElement {
     constructor() {
         super();
     }
 
     connectedCallback() {
         this.runMode = 0;
-        this.station;
-        this.addr;
 
-        this.className = 'coilShowBox';
+        this.className = 'textShow';
 
-        this.coilShowValue = document.createElement('div');
-        this.coilShowValue.innerText = 'False';
+        this.TextShowValue = document.createElement('div');
 
-        this.coilShowDel = document.createElement('div');
-        this.coilShowDel.innerText = '删除';
-        this.coilShowDel.style.color = 'red';
-        this.coilShowDel.addEventListener('click', () => {
+        this.TextShowDel = document.createElement('div');
+        this.TextShowDel.innerText = '删除';
+        this.TextShowDel.style.color = 'red';
+        this.TextShowDel.addEventListener('click', () => {
             this.remove();
         });
 
-        this.coilShowInfo = document.createElement('div');
-        this.coilShowInfo.innerText = `01,${this.station},${this.addr}`;
-
-        this.append(this.coilShowValue, this.coilShowInfo, this.coilShowDel);
+        this.append(this.TextShowValue, this.TextShowDel);
 
         // 窗口拖动
         this.draging = false;
@@ -69,15 +63,23 @@ class CoilShow extends HTMLElement {
         }
     }
 
+    setText(text){
+        this.TextShowValue.innerText = text;
+    }
+
+    getText(){
+        return this.TextShowValue.innerText;
+    }
+
     toRunMode() {
-        this.coilShowDel.style.display = 'none';
+        this.TextShowDel.style.display = 'none';
         this.runMode = 1;
     }
 
     toEditorMode() {
-        this.coilShowDel.style.display = 'block';
+        this.TextShowDel.style.display = 'block';
         this.runMode = 0;
     }
 }
 
-customElements.define("coil-show", CoilShow);
+customElements.define("text-show", TextShow);

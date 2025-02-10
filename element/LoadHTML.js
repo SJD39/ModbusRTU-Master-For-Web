@@ -1,6 +1,4 @@
 class LoadHTML extends HTMLElement{
-    static observedAttributes = ["src"];
-
     constructor(){
         super();
     }

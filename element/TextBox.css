@@ -1,0 +1,14 @@
+.textShow{
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    
+    padding: 6px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    color: #39c5bb;
+}
+
+.textShow *{
+    padding: 6px;
+}
