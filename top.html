@@ -65,11 +65,16 @@
                 coilCtrls[i].toRunMode();
             }
 
-            timer = setInterval(async function () {
-                for (let i = 0; i < coilShows.length; i++) {
-                    coilShows[i].coilShowValue.innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
-                }
-            }, Number(refreshRate.getOption()));
+            function loop() {
+                timer = setTimeout(async function () {
+                    for (let i = 0; i < coilShows.length; i++) {
+                        coilShows[i].coilShowValue.innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
+                    }
+
+                    loop();
+                }, Number(refreshRate.getOption()));
+            };
+            loop();
         } else if (runMode.value == 1) {
             for (let i = 0; i < coilShows.length; i++) {
                 coilShows[i].toEditorMode();
@@ -83,4 +88,7 @@
             clearInterval(timer);
         }
     }
+
+
+
 </script>
