@@ -198,6 +198,12 @@ class ModBusRTUMaster {
         return;
     }
 
+    // 任务管理
+    taskManager() {
+        
+    }
+
+    // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;
 
