@@ -2,6 +2,34 @@
 class ModBusRTUMaster {
     constructor() {
         this.port = null;
+
+        this.taskQueue = [];
+        this.taskRunning = false;
+    }
+
+    // 添加任务队列
+    enqueueTask(task) {
+        this.taskQueue.push(task);
+        this.executeQueue();
+    }
+
+    // 执行任务队列
+    async executeQueue() {
+        if(this.taskRunning || this.taskQueue.length === 0){
+            return;
+        }
+
+        this.taskRunning = true;
+        const task = this.taskQueue.shift();
+
+        try{
+            await task();
+        } catch (error) {
+            console.log(error);
+        }finally {
+            this.taskRunning = false;
+            this.executeQueue();
+        }
     }
 
     // 01 读线圈
@@ -198,10 +226,7 @@ class ModBusRTUMaster {
         return;
     }
 
-    // 任务管理
-    taskManager() {
-        
-    }
+
 
     // crc校验生成
     crc(data) {
