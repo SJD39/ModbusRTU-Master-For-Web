@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,21 +23,24 @@
     <link rel="stylesheet" href="./element/TextBox.css">
 
     <script src="./element/CoilCtrl.js"></script>
-    <link rel="stylesheet" href="./element/CoilCtrl.css"></link>
+    <link rel="stylesheet" href="./element/CoilCtrl.css">
+    </link>
 
     <script src="./element/LoadHTML.js"></script>
 
     <script>
-        window.addEventListener("contextmenu", function(e){
+        window.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
     </script>
     <script src="./js/ModBusRTUMaster.js"></script>
 </head>
+
 <body>
     <popup-tip id="popupTip"></popup-tip>
-    <load-html src="./top.html"></load-html>
-    <load-html src="./content.html"></load-html>
-    <load-html src="./clickMenu.html"></load-html>
+    <load-html timing="now" src="./top.html"></load-html>
+    <load-html timing="now" callback="{clickMenuLoad.getHtml();}" src="./content.html"></load-html>
+    <load-html id="clickMenuLoad" src="./clickMenu.html"></load-html>
 </body>
+
 </html>

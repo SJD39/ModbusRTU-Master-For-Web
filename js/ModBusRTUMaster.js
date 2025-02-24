@@ -10,25 +10,29 @@ class ModBusRTUMaster {
     // 添加任务队列
     enqueueTask(task) {
         this.taskQueue.push(task);
-        this.executeQueue();
     }
 
     // 执行任务队列
     async executeQueue() {
-        if(this.taskRunning || this.taskQueue.length === 0){
+        console.log("当前任务数：", this.taskQueue.length);
+
+        if (this.taskRunning || this.taskQueue.length === 0) {
+            setTimeout(async () => { this.executeQueue() }, 0);
             return;
         }
 
         this.taskRunning = true;
+        console.log("任务执行中。。。");
         const task = this.taskQueue.shift();
 
-        try{
+        try {
             await task();
         } catch (error) {
-            console.log(error);
-        }finally {
+            console.log("寄了:", error);
+        } finally {
             this.taskRunning = false;
-            this.executeQueue();
+            console.log("任务执行完成。。");
+            setTimeout(async () => { this.executeQueue() }, 0);
         }
     }
 
@@ -57,13 +61,21 @@ class ModBusRTUMaster {
 
         let readValues = [];
         while (true) {
+            console.log("reader.read()");
             const { value, done } = await reader.read();
+            console.log(value);
+            console.log(done);
 
             for (let i = 0; i < value.length; i++) {
                 readValues.push(value[i]);
             }
 
             if (readValues.length >= 3) {
+                if (readValues.length > readValues[2] + 5){
+                    // 返回的是其他东西
+                    reader.releaseLock();
+                    return;
+                }
                 if (readValues.length == readValues[2] + 5) {
                     reader.releaseLock();
                     break;
@@ -207,7 +219,6 @@ class ModBusRTUMaster {
         let writer = this.port.writable.getWriter();
         await writer.write(new Uint8Array([id, 5, addrH, addrL, value ? 0xff : 0, 0, crc[0], crc[1]]));
         writer.releaseLock();
-        return;
     }
 
     // 06 写单个保持寄存器

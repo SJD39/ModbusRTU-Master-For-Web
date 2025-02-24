@@ -1,17 +1,26 @@
-class LoadHTML extends HTMLElement{
-    constructor(){
+class LoadHTML extends HTMLElement {
+    constructor() {
         super();
     }
 
-    connectedCallback(){
-        let src;
-        if(this.hasAttribute("src")){
-            src = this.getAttribute("src");
-        }else{
+    connectedCallback() {
+        this.src;
+        this.done = false;
+
+        if (this.hasAttribute("src")) {
+            this.src = this.getAttribute("src");
+        } else {
             return;
         }
 
-        fetch(src)
+        if (this.getAttribute("timing") == "now") {
+            this.getHtml();
+        }
+    }
+
+    // 获取html
+    getHtml() {
+        fetch(this.src)
             .then(response => response.text())
             .then(html => {
                 this.innerHTML = html;
@@ -22,8 +31,12 @@ class LoadHTML extends HTMLElement{
                     scriptElement.innerHTML = script.innerHTML;
                     script.parentNode.replaceChild(scriptElement, script);
                 });
-            })
 
+                this.done = true;
+                if (this.hasAttribute("callback")) {
+                    setTimeout(this.getAttribute("callback"), 0);
+                }
+            });
     }
 }
 
