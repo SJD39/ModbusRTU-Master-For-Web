@@ -7,6 +7,7 @@ class TextShow extends HTMLElement {
         this.runMode = 0;
 
         this.className = 'textShow';
+        this.draggable = true;
 
         this.TextShowValue = document.createElement('div');
 
@@ -20,47 +21,18 @@ class TextShow extends HTMLElement {
         this.append(this.TextShowValue, this.TextShowDel);
 
         // 窗口拖动
-        this.draging = false;
-        this.mouseX = 0;
-        this.mouseY = 0;
-        this.offsetX = 0;
-        this.offsetY = 0;
+        this.addEventListener('dragstart', (e) => {
+            let x = e.clientX - this.offsetLeft;
+            let y = e.clientY - this.offsetTop;
+            this.addEventListener('dragend', (e) => {
+                if(this.runMode != 0){
+                    return;
+                }
 
-        this.addEventListener('mousedown', (e) => {
-            if(this.runMode != 0){
-                return;
-            }
-            this.draging = true;
-            this.offsetX = this.mouseX - this.offsetLeft;
-            this.offsetY = this.mouseY - this.offsetTop;
-
-            this.drag();
-        });
-
-        this.addEventListener('click', (e) => {
-            e.stopImmediatePropagation();
-        });
-
-        document.addEventListener('mouseup', (e) => {
-            this.draging = false;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            this.mouseX = e.clientX;
-            this.mouseY = e.clientY;
-        });
-    }
-
-    // 拖动动画
-    drag() {
-        this.style.left = this.mouseX - this.offsetX + 'px';
-        this.style.top = this.mouseY - this.offsetY + 'px';
-
-        if (this.draging) {
-            window.requestAnimationFrame(() => {
-                this.drag();
+                this.style.left = (e.clientX - x) + 'px';
+                this.style.top = (e.clientY - y) + 'px';
             });
-        }
+        });
     }
 
     setText(text){

@@ -1,0 +1,31 @@
+.coilCtrlBox{
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    
+    padding: 6px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    color: #39c5bb;
+}
+
+.coilCtrlBox *{
+    padding: 6px;
+}
+
+/*  */
+
+.coilShowBox{
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    
+    padding: 6px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    color: #39c5bb;
+}
+
+.coilShowBox *{
+    padding: 6px;
+}
