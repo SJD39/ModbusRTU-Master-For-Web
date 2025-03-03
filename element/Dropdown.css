@@ -5,6 +5,10 @@
     width: max-content;
 }
 
+.dropDownViewBox:hover{
+    background-color: #ffffffaa;
+}
+
 .dropDownUl{
     position: absolute;
     left: -10px;
