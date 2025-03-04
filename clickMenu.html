@@ -55,8 +55,6 @@
         coilShow.style.top = clickMenuBox.style.top;
 
         body_content.append(coilShow);
-
-        document.cookie = getJsonFromDom()
     });
 
     // 添加静态文字
@@ -74,11 +72,9 @@
         let textShow = document.createElement('text-show');
         textShow.style.left = clickMenuBox.style.left;
         textShow.style.top = clickMenuBox.style.top;
-
         body_content.append(textShow);
-        textShow.setText(text);
-
-        document.cookie = getJsonFromDom()
+        textShow.text = text;
+        textShow.setText();
     });
 
     // 添加线圈输入
@@ -123,8 +119,6 @@
         coilCtrl.style.top = clickMenuBox.style.top;
 
         body_content.append(coilCtrl);
-
-        document.cookie = getJsonFromDom()
     });
 
 

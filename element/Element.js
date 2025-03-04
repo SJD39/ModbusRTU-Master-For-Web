@@ -139,11 +139,13 @@ class TextShow extends HTMLElement {
 
     connectedCallback() {
         this.runMode = 0;
+        this.text = '默认文字';
 
         this.className = 'textShow';
         this.draggable = true;
 
         this.TextShowValue = document.createElement('div');
+        this.TextShowValue.innerText = this.text;
 
         this.TextShowDel = document.createElement('div');
         this.TextShowDel.innerText = '删除';
@@ -169,12 +171,8 @@ class TextShow extends HTMLElement {
         });
     }
 
-    setText(text){
-        this.TextShowValue.innerText = text;
-    }
-
-    getText(){
-        return this.TextShowValue.innerText;
+    setText(){
+        this.TextShowValue.innerText = this.text;
     }
 
     toRunMode() {
