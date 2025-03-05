@@ -46,3 +46,75 @@
 .textShow *{
     padding: 6px;
 }
+
+.dropDownBox{
+    display: inline-block;
+    position: relative;
+
+    width: max-content;
+}
+
+.dropDownViewBox{
+    transition: .3s;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.dropDownViewBox:hover{
+    background-color: #fff;
+    color: #39c5bb;
+}
+
+.dropDownUl{
+    position: absolute;
+    left: -10px;
+    width: max-content;
+
+    background-color: #39c5bb;
+    border-color: #fff;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.dropDownUl li{
+    padding: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    transition: all 0.3s;
+    text-align: center;
+    border-bottom: #ffffff39 2px solid;
+}
+
+.dropDownUl li:hover{
+    background-color: #fff;
+    color: #39c5bb;
+}
+
+.dropDownUl li:last-child{
+    border-bottom: none;
+}
+
+.radioBox{
+    display: inline-block;
+}
+
+.radioUl{
+    display: flex;
+    justify-content: space-between;
+}
+
+.radioLi{
+    display: inline;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.radioLiSelected{
+    background-color: #ffffff39;
+}
