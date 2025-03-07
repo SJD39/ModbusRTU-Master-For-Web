@@ -1,12 +1,13 @@
 class CoilCtrl extends HTMLElement {
     constructor() {
         super();
-    }
 
-    connectedCallback() {
         this.runMode = 0;
         this.station;
         this.addr;
+    }
+
+    connectedCallback() {
         this.setCallBackFun = function(){};
         this.resetCallBackFun = function(){};
 
@@ -38,10 +39,6 @@ class CoilCtrl extends HTMLElement {
             let x = e.clientX - this.offsetLeft;
             let y = e.clientY - this.offsetTop;
             this.addEventListener('dragend', (e) => {
-                if(this.runMode != 0){
-                    return;
-                }
-
                 this.style.left = (e.clientX - x) + 'px';
                 this.style.top = (e.clientY - y) + 'px';
             });
@@ -62,14 +59,16 @@ class CoilCtrl extends HTMLElement {
         this.resetCallBackFun(this.station, this.addr);
     }
 
-    toRunMode() {
+    toShowMode() {
         this.CoilCtrlDel.style.display = 'none';
         this.runMode = 1;
+        this.draggable = false;
     }
 
-    toEditorMode() {
+    toEditMode() {
         this.CoilCtrlDel.style.display = 'block';
         this.runMode = 0;
+        this.draggable = true;
     }
 }
 
@@ -78,13 +77,13 @@ customElements.define("coil-ctrl", CoilCtrl);
 class CoilShow extends HTMLElement {
     constructor() {
         super();
-    }
 
-    connectedCallback() {
         this.runMode = 0;
         this.station;
         this.addr;
+    }
 
+    connectedCallback() {
         this.className = 'coilShowBox';
         this.draggable = true;
 
@@ -108,24 +107,22 @@ class CoilShow extends HTMLElement {
             let x = e.clientX - this.offsetLeft;
             let y = e.clientY - this.offsetTop;
             this.addEventListener('dragend', (e) => {
-                if(this.runMode != 0){
-                    return;
-                }
-
                 this.style.left = (e.clientX - x) + 'px';
                 this.style.top = (e.clientY - y) + 'px';
             });
         });
     }
 
-    toRunMode() {
+    toShowMode() {
         this.coilShowDel.style.display = 'none';
         this.runMode = 1;
+        this.draggable = false;
     }
 
-    toEditorMode() {
+    toEditMode() {
         this.coilShowDel.style.display = 'block';
         this.runMode = 0;
+        this.draggable = true;
     }
 }
 
@@ -135,15 +132,14 @@ customElements.define("coil-show", CoilShow);
 class TextShow extends HTMLElement {
     constructor() {
         super();
+
+        this.runMode = 0;
+        this.text = '默认文字';
     }
 
     connectedCallback() {
-        this.runMode = 0;
-        this.text = '默认文字';
-
-        this.className = 'textShow';
         this.draggable = true;
-
+        this.className = 'textShow';
         this.TextShowValue = document.createElement('div');
         this.TextShowValue.innerText = this.text;
 
@@ -161,28 +157,22 @@ class TextShow extends HTMLElement {
             let x = e.clientX - this.offsetLeft;
             let y = e.clientY - this.offsetTop;
             this.addEventListener('dragend', (e) => {
-                if(this.runMode != 0){
-                    return;
-                }
-
                 this.style.left = (e.clientX - x) + 'px';
                 this.style.top = (e.clientY - y) + 'px';
             });
         });
     }
 
-    setText(){
-        this.TextShowValue.innerText = this.text;
-    }
-
-    toRunMode() {
+    toShowMode() {
         this.TextShowDel.style.display = 'none';
         this.runMode = 1;
+        this.draggable = false;
     }
 
-    toEditorMode() {
+    toEditMode() {
         this.TextShowDel.style.display = 'block';
         this.runMode = 0;
+        this.draggable = true;
     }
 }
 

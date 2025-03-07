@@ -1,7 +1,9 @@
+
+
 // 保存至cookie
 function saveToCookie() {
     let json = {};
-    
+
     let coilShows = document.getElementsByTagName('coil-show');
     let coilShowsJson = [];
     for (let i = 0; i < coilShows.length; i++) {
@@ -43,8 +45,7 @@ function saveToCookie() {
 
 // 从cookie中读取数据
 function readFromCookie() {
-    // 清除原有dom
-    body_content.innerHTML = "";
+    elementMgr.removeAll();
 
     // 生成dom
     let cookie = JSON.parse(document.cookie);
@@ -62,9 +63,8 @@ function readFromCookie() {
         let textShow = document.createElement('text-show');
         textShow.style.top = cookie.textShows[i].y;
         textShow.style.left = cookie.textShows[i].x;
-        body_content.append(textShow);
         textShow.text = cookie.textShows[i].value;
-        textShow.setText();
+        body_content.append(textShow);
     }
 
     for (let i = 0; i < cookie.coilCtrls.length; i++) {

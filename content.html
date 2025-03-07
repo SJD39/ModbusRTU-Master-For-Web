@@ -4,3 +4,43 @@
         
     </div>
 </div>
+<script>
+    class ElementMgr {
+        constructor(){
+            this.parent;
+            this.elements;
+        }
+
+        // 更新元素列表
+        updateElements() {
+            this.elements = this.parent.querySelectorAll("coil-show, text-show, coil-ctrl");
+        }
+
+        // 切换至演示模式
+        toShowMode() {
+            elementMgr.updateElements();
+            for (let i = 0; i < this.elements.length; i++) {
+                this.elements[i].toShowMode();
+            }
+        }
+
+        // 切换至编辑模式
+        toEditMode() {
+            elementMgr.updateElements();
+            for (let i = 0; i < this.elements.length; i++) {
+                this.elements[i].toEditMode();
+            }
+        }
+
+        // 将所有元素从dom中移除
+        removeAll() {
+            elementMgr.updateElements();
+            for (let i = 0; i < this.elements.length; i++) {
+                this.elements[i].remove();
+            }
+        }
+    }
+
+    var elementMgr = new ElementMgr();
+    elementMgr.parent = body_content;
+</script>
