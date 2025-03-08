@@ -1,10 +1,3 @@
-// 元素参数对应
-var mdElementParams  = {
-    "coil-show": ["station", "addr", "y", "x"],
-    "text-show": ["y", "x", "value"],
-    "coil-ctrl": ["station", "addr", "y", "x"]
-}
-
 // 保存至cookie
 function saveToCookie() {
     let json = {};

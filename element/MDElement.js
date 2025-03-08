@@ -90,6 +90,7 @@ class CoilShow extends MDElement {
     }
 
     connectedCallback() {
+        super.connectedCallback();
         this.className = 'coilShowBox';
 
         this.coilShowValue = document.createElement('div');
@@ -98,7 +99,7 @@ class CoilShow extends MDElement {
         this.coilShowInfo = document.createElement('div');
         this.coilShowInfo.innerText = `01,${this.station},${this.addr}`;
 
-        this.append(this.coilShowValue, this.coilShowInfo, this.coilShowDel);
+        this.append(this.coilShowValue, this.coilShowInfo, this.delBox);
     }
 }
 
