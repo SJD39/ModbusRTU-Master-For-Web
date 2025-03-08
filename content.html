@@ -7,13 +7,13 @@
 <script>
     class ElementMgr {
         constructor(){
-            this.parent;
             this.elements;
         }
 
         // 更新元素列表
         updateElements() {
-            this.elements = this.parent.querySelectorAll("coil-show, text-show, coil-ctrl");
+            this.elements = document.querySelectorAll("coil-show, text-show, coil-ctrl");
+            return this.elements;
         }
 
         // 切换至演示模式
@@ -42,5 +42,4 @@
     }
 
     var elementMgr = new ElementMgr();
-    elementMgr.parent = body_content;
 </script>

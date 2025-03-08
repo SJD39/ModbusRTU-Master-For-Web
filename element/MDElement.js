@@ -1,13 +1,11 @@
 class MDElement extends HTMLElement {
     constructor() {
         super();
-
         this.runMode = 0;
     }
 
     connectedCallback() {
         this.draggable = true;
-
         this.delBox = document.createElement('div');
         this.delBox.innerText = '删除';
         this.delBox.style.color = 'red';
@@ -42,7 +40,6 @@ class MDElement extends HTMLElement {
 class CoilCtrl extends MDElement {
     constructor() {
         super();
-
         this.station;
         this.addr;
     }
@@ -54,7 +51,6 @@ class CoilCtrl extends MDElement {
         this.resetCallBackFun = function(){};
 
         this.className = 'coilCtrlBox';
-
         this.CoilCtrlSet = document.createElement('div');
         this.CoilCtrlSet.innerText = '设1';
         this.CoilCtrlSet.addEventListener('click', this.setCallBack);
@@ -89,7 +85,6 @@ customElements.define("coil-ctrl", CoilCtrl);
 class CoilShow extends MDElement {
     constructor() {
         super();
-
         this.station;
         this.addr;
     }
