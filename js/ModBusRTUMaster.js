@@ -60,11 +60,9 @@ class ModBusRTUMaster {
         }
 
         let readValues = [];
+        let startTime = Date.now();
         while (true) {
-            console.log("reader.read()");
             const { value, done } = await reader.read();
-            console.log(value);
-            console.log(done);
 
             for (let i = 0; i < value.length; i++) {
                 readValues.push(value[i]);
@@ -80,6 +78,12 @@ class ModBusRTUMaster {
                     reader.releaseLock();
                     break;
                 }
+            }
+
+            // 超时
+            if (Date.now() - startTime > 1000) {
+                reader.releaseLock();
+                return;
             }
         }
 
