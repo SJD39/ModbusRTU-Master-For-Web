@@ -36,8 +36,54 @@ class ModBusRTUMaster {
         }
     }
 
+    // 串口读取
+    async serialRead() {
+        // 读返回值
+        let reader;
+        try {
+            reader = this.port.readable.getReader();
+        } catch (error) {
+            console.log("获取读取错误");
+            return;
+        }
+
+        let data = [];
+        // 已处理计数
+        let dataCount = 0;
+        let funCode = 0;
+        let step = 0;
+        while (true) {
+            const { value, done } = await reader.read();
+            for (let i = 0; i < value.length; i++) {
+                data.push(value[i].toString(16));
+            }
+            console.log(data);
+
+            // ModBus 解析
+            if (step == 0) {
+                console.log(`站号：${data[0]}`);
+                dataCount++;
+                step++;
+            } else if (step == 1 && (data.length - dataCount > 0)) {
+                console.log(`功能码：${data[dataCount]}`);
+                funCode = data[dataCount];
+                dataCount++;
+                step++;
+            } else if (step == 2 && (data.length - dataCount > 0)) {
+                if(funCode = 1 || funCode == 3){
+                    console.log(`数据长度：${data[dataCount]}`);
+                }
+            }
+
+            data = [];
+            dataCount = 0;
+        }
+        reader.releaseLock();
+    }
+
     // 01 读线圈
     async readCoilsAsync(id, addr, length) {
+        let error = false;
         // 写指令
         let addrH = addr >> 8;
         let addrL = addr & 0xFFFF;
@@ -69,11 +115,6 @@ class ModBusRTUMaster {
             }
 
             if (readValues.length >= 3) {
-                if (readValues.length > readValues[2] + 5){
-                    // 返回的是其他东西
-                    reader.releaseLock();
-                    return;
-                }
                 if (readValues.length == readValues[2] + 5) {
                     reader.releaseLock();
                     break;
@@ -85,6 +126,11 @@ class ModBusRTUMaster {
                 reader.releaseLock();
                 return;
             }
+        }
+
+        if (error) {
+            console.log("timeout");
+            return;
         }
 
         // crc校验

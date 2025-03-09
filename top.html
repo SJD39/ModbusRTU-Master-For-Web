@@ -46,6 +46,8 @@
             bufferSize: 1024,
             flowControl: "none"
         });
+
+        await master.serialRead();
     }
 
     var timer;
