@@ -6,7 +6,7 @@ class ModBusRTUMaster {
         this.taskQueue = [];
         this.taskRunning = false;
 
-        this.funCodes = [0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0xf, 0x10];
+        this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
         this.analysisEn = false;
     }
 
@@ -41,7 +41,7 @@ class ModBusRTUMaster {
 
     // 串口读取
     async serialRead(id, funCode) {
-        // 读返回值
+        // 获取读取器
         let reader;
         try {
             reader = this.port.readable.getReader();
@@ -53,65 +53,78 @@ class ModBusRTUMaster {
         // 以下为modbus主站响应实现
         let first = true;
         let data = [];
+        let dataLen = 0;
         // 已处理数据计数
         let dataCount = 0;
         let step = 0;
+        let result = [];
         while (true) {
-            Promise.race([
-                new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        reader.releaseLock();
-                        reject(new Error("读取超时"));
-                    }, 1000);
-                }),
-                reader.read()
-            ]).catch(error => {
-                console.log(error);
-            });
+            const { value, done } = await reader.read();
 
             // 扔掉之前接受到的数据
-            if (!first) {
-                console.log(`丢掉~${value}`);
-                break;
-            }
+            // if (!first) {
+            //     console.log(`丢掉~${value}`);
+            //     break;
+            // }
 
             // 串口数据
             for (let i = 0; i < value.length; i++) {
-                data.push(value[i].toString(16));
+                data.push(value[i]);
             }
+            console.log(value);
             console.log(data);
 
             // ModBus指令解析
             if (step == 0) {
-                if (!(data[0] >= 1 && data[0] <= 247)) {
-                    console.log(`错误的站号`);
-                    return { "error": "错误的站号" };
-                }
-
-                console.log(`站号：${data[0]}`);
-                dataCount++;
-                step++;
-            }
-
-            if (step == 1 && (data.length - dataCount > 0)) {
                 funCode = data[dataCount];
                 if (!this.funCodes.includes(funCode)) {
                     console.log(`异常的功能码 ${funCode}`);
                     return { "error": "异常的功能码" };
                 }
 
-                console.log(`功能码：${data[dataCount]}`);
+                console.log(`功能码：${funCode}`);
                 dataCount++;
                 step++;
             }
 
-            if (step == 2 && (data.length - dataCount > 0)) {
+            if (step == 1 && (data.length - dataCount > 0)) {
                 if ([1, 2, 3, 4].includes(funCode)) {
+                    dataLen = data[dataCount];
                     console.log(`数据长度：${data[dataCount]}`);
-                } else if ([5, 6, 15, 16].includes(funCode)) {
 
+                    dataCount++;
+                    step++;
+                } else if ([5, 6, 15, 16].includes(funCode)) {
+                    if (data.length - dataCount >= 4) {
+                        console.log(`输出地址：${data[dataCount]}，${data[dataCount + 1]}`);
+                        console.log(`输出值：${data[dataCount + 2]}，${data[dataCount + 3]}`);
+
+                        dataCount = dataCount + 4;
+                        step = 10;
+                    }
                 }
             }
+
+            if (step == 2 && (data.length - dataCount >= dataLen)) {
+                console.log(`数据：`);
+                for (let i = 0; i < dataLen; i++) {
+                    console.log(`${data[dataCount]}`);
+                    dataCount++;
+                }
+                step = 10;
+            }
+
+            // crc校验
+            if (step == 10 && (data.length - dataCount >= 2)) {
+                let crc = this.crc(data.slice(0, data.length - 2));
+
+                if (this.arrayEqual(crc, [data[dataCount], data[dataCount + 1]])){
+                    console.log("校验成功！");
+                }else{
+                    console.log("校验失败！");
+                }
+            }
+
         }
         reader.releaseLock();
     }
