@@ -26,7 +26,6 @@
 
 <script>
     var master = new ModBusRTUMaster();
-    // master.executeQueue();
 
     async function openSerial() {
         try {
@@ -47,7 +46,6 @@
             flowControl: "none"
         });
 
-        //await master.serialRead();
     }
 
     var timer;

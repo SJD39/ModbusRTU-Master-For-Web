@@ -10,33 +10,26 @@ class ModBusRTUMaster {
         this.analysisEn = false;
     }
 
-    // 01 读线圈
-    async readCoilsAsync(id, addr, length) {
+    // 变更状态为忙碌
+    async busy() {
         while (this.taskRunning) {
             console.log("等待中。。。");
             await new Promise(resolve => setTimeout(resolve, 10));
         }
         this.taskRunning = true;
+    }
+
+    // 01 读线圈
+    async readCoilsAsync(id, addr, len) {
+        await this.busy();
 
         // 写指令
-        let addrH = addr >> 8;
-        let addrL = addr & 0xFFFF;
-        let lengthH = length >> 8;
-        let lengthL = length & 0xFFFF;
-
-        let data = new Uint8Array([id, 1, addrH, addrL, lengthH, lengthL]);
+        let data = [id, 1, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
         let crc = this.crc(data);
 
-        let writer;
-        try {
-            writer = this.port.writable.getWriter();
-            await writer.write(new Uint8Array([...data, ...crc]));
-        } catch (error) {
-            this.taskRunning = false;
-            throw new Error(`获取写入器失败：${error}`);
-        } finally{
-            writer.releaseLock();
-        }
+        const writer = this.port.writable.getWriter();
+        await writer.write(new Uint8Array([...data, ...crc]));
+        writer.releaseLock();
 
         // 读返回值
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
@@ -51,6 +44,31 @@ class ModBusRTUMaster {
         }
 
         return result[0] == 1 ? true : false;
+    }
+
+    // 03 读保持寄存器
+    async readHoldingRegistersAsync(id, addr, len) {
+        // 写指令
+        let data = [id, 3, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
+        let crc = this.crc(data);
+
+        let writer = this.port.writable.getWriter();
+        await writer.write(new Uint8Array([...data, ...crc]));
+        writer.releaseLock();
+
+        // 读返回值
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
+        const result = this.serialRead(id, 3);
+
+        try {
+            await Promise.race([result, timeoutPromise]);
+        } catch (error) {
+            throw new Error(`串口读取失败：${error}`);
+        } finally {
+            this.taskRunning = false;
+        }
+
+        return result;
     }
 
     // 串口读取
@@ -147,57 +165,6 @@ class ModBusRTUMaster {
         }
     }
 
-    // 03 读保持寄存器
-    async readHoldingRegistersAsync(id, addr, length) {
-        // 写指令
-        let addrH = addr >> 8;
-        let addrL = addr & 0xFFFF;
-        let lengthH = length >> 8;
-        let lengthL = length & 0xFFFF;
-
-        let data = new Uint8Array([id, 3, addrH, addrL, lengthH, lengthL]);
-        let crc = this.crc(data);
-
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([id, 3, addrH, addrL, lengthH, lengthL, crc[0], crc[1]]));
-        writer.releaseLock();
-
-        // 读返回值
-        let reader = this.port.readable.getReader();
-        let readValues = [];
-        while (true) {
-            const { value, done } = await reader.read();
-
-            for (let i = 0; i < value.length; i++) {
-                readValues.push(value[i]);
-            }
-
-            if (readValues.length >= 3) {
-                if (readValues.length == readValues[2] + 5) {
-                    reader.releaseLock();
-                    break;
-                }
-            }
-        }
-
-        // crc校验
-        let calcCrc = this.crc(readValues.slice(0, readValues.length - 2));
-        let readCrc = readValues.slice(readValues.length - 2, readValues.length);
-        if (!this.arrayEqual(calcCrc, readCrc)) {
-            console.log("crc校验失败！");
-            return;
-        }
-
-        // 输出
-        let result = [];
-        for (let i = 0; i < readValues[2]; i = i + 2) {
-            result.push([readValues[3 + i], readValues[3 + i + 1]]);
-        }
-
-        console.log(result);
-        return result;
-    }
-
     // 04 读输入寄存器
     async ReadInputRegistersAsync(id, addr, length) {
         // 写指令
@@ -260,6 +227,7 @@ class ModBusRTUMaster {
         let writer = this.port.writable.getWriter();
         await writer.write(new Uint8Array([id, 5, addrH, addrL, value ? 0xff : 0, 0, crc[0], crc[1]]));
         writer.releaseLock();
+        return;
     }
 
     // 06 写单个保持寄存器
