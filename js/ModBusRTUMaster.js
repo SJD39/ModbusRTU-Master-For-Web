@@ -29,14 +29,28 @@ class ModBusRTUMaster {
         let data = new Uint8Array([id, 1, addrH, addrL, lengthH, lengthL]);
         let crc = this.crc(data);
 
-        let writer = this.port.writable.getWriter();
+        let writer;
+        try {
+            writer = this.port.writable.getWriter();
+        } catch (error) {
+            this.taskRunning = false;
+            throw new Error("获取写入器失败");
+        }
+
         await writer.write(new Uint8Array([id, 1, addrH, addrL, lengthH, lengthL, crc[0], crc[1]]));
         writer.releaseLock();
 
         // 读返回值
-        let result = await this.serialRead(id, 1);
-        this.taskRunning = false;
-        return result;
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
+        const result = this.serialRead(id, 1);
+
+        try{
+            return await Promise.race([result, timeoutPromise]);
+        }catch(error){
+            throw new Error(`串口读取失败：${error}`);
+        }finally{
+            this.taskRunning = false;
+        }
     }
 
     // 串口读取
@@ -46,8 +60,7 @@ class ModBusRTUMaster {
         try {
             reader = this.port.readable.getReader();
         } catch (error) {
-            console.log("获取读取错误");
-            return;
+            throw new Error("获取读取器失败");
         }
 
         // 以下为modbus主站响应实现
@@ -66,67 +79,64 @@ class ModBusRTUMaster {
             console.log(data);
 
             // ModBus指令解析
-            try {
-                // 解析站号
-                if (step == 0) {
-                    if (id != data[dataCount]) {
-                        console.log(`站号错误：${data[dataCount]}`);
-                        throw new Error("站号错误");
-                    }
-                    console.log(`站号：${data[dataCount]}`);
+            // 解析站号
+            if (step == 0) {
+                if (id != data[dataCount]) {
+                    console.log(`站号错误：${data[dataCount]}`);
+                    throw new Error("站号错误");
+                }
+                console.log(`站号：${data[dataCount]}`);
+
+                dataCount++;
+                step++;
+            }
+
+            // 解析功能码
+            if (step == 1 && (data.length - dataCount > 0)) {
+                if (funCode != data[dataCount]) {
+                    console.log(`功能码错误： ${funCode},${data[dataCount]}`);
+                    throw new Error("功能码错误");
+                }
+                console.log(`功能码：${data[dataCount]}`);
+
+                dataCount++;
+                step++;
+            }
+
+            // 解析数据
+            if (step == 2 && (data.length - dataCount > 0)) {
+                if ([1, 2, 3, 4].includes(funCode)) {
+                    dataLen = data[dataCount];
+                    console.log(`数据长度：${data[dataCount]}`);
 
                     dataCount++;
                     step++;
                 }
+            }
 
-                // 解析功能码
-                if (step == 1 && (data.length - dataCount > 0)) {
-                    if (funCode != data[dataCount]) {
-                        console.log(`功能码错误： ${funCode},${data[dataCount]}`);
-                        throw new Error("功能码错误");
-                    }
-                    console.log(`功能码：${data[dataCount]}`);
-
+            if (step == 3 && (data.length - dataCount >= dataLen)) {
+                console.log(`数据：`);
+                for (let i = 0; i < dataLen; i++) {
+                    console.log(`${data[dataCount]}`);
+                    result.push(data[dataCount]);
                     dataCount++;
-                    step++;
                 }
+                step = 10;
+            }
 
-                // 解析数据
-                if (step == 2 && (data.length - dataCount > 0)) {
-                    if ([1, 2, 3, 4].includes(funCode)) {
-                        dataLen = data[dataCount];
-                        console.log(`数据长度：${data[dataCount]}`);
+            // crc校验
+            if (step == 10 && (data.length - dataCount >= 2)) {
+                let crc = this.crc(data.slice(0, data.length - 2));
 
-                        dataCount++;
-                        step++;
-                    }
-                }
-
-                if (step == 3 && (data.length - dataCount >= dataLen)) {
-                    console.log(`数据：`);
-                    for (let i = 0; i < dataLen; i++) {
-                        console.log(`${data[dataCount]}`);
-                        result.push(data[dataCount]);
-                        dataCount++;
-                    }
-                    step = 10;
-                }
-
-                // crc校验
-                if (step == 10 && (data.length - dataCount >= 2)) {
-                    let crc = this.crc(data.slice(0, data.length - 2));
-
-                    if (this.arrayEqual(crc, [data[dataCount], data[dataCount + 1]])) {
-                        console.log("校验成功！");
-                    } else {
-                        console.log("校验失败！");
-                    }
-
-                    console.log("数据读取完毕！", result);
+                if (this.arrayEqual(crc, [data[dataCount], data[dataCount + 1]])) {
+                    console.log("校验成功！");
+                    reader.releaseLock();
                     return result;
+                } else {
+                    console.log("校验失败！");
+                    reader.releaseLock();
+                    throw new Error("crc校验失败");
                 }
-            } finally {
-                reader.releaseLock();
             }
         }
     }
