@@ -43,11 +43,13 @@ class ModBusRTUMaster {
             this.taskRunning = false;
         }
 
-        return result[0] == 1 ? true : false;
+        return result[0] === 1 ? true : false;
     }
 
     // 03 读保持寄存器
     async readHoldingRegistersAsync(id, addr, len) {
+        await this.busy();
+
         // 写指令
         let data = [id, 3, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
         let crc = this.crc(data);
@@ -71,6 +73,59 @@ class ModBusRTUMaster {
         return result;
     }
 
+    // 04 读输入寄存器
+    async ReadInputRegistersAsync(id, addr, len) {
+        await this.busy();
+
+        // 写指令
+        let data = [id, 4, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
+        let crc = this.crc(data);
+
+        let writer = this.port.writable.getWriter();
+        await writer.write(new Uint8Array([...data, ...crc]));
+        writer.releaseLock();
+
+        // 读返回值
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
+        const result = this.serialRead(id, 4);
+
+        try {
+            await Promise.race([result, timeoutPromise]);
+        } catch (error) {
+            throw new Error(`串口读取失败：${error}`);
+        } finally {
+            this.taskRunning = false;
+        }
+
+        return result;
+    }
+
+    // 05 写单个线圈
+    async writeSingleCoilAsync(id, addr, value) {
+        await this.busy();
+
+        let data = [id, 5, addr >> 8, addr & 0xFFFF, value ? 0xff : 0, 0];
+        let crc = this.crc(data);
+
+        let writer = this.port.writable.getWriter();
+        await writer.write(new Uint8Array([...data, ...crc]));
+        writer.releaseLock();
+        return;
+    }
+
+    // 06 写单个保持寄存器
+    async WriteSingleRegister(id, addr, value) {
+        await this.busy();
+
+        let data = [id, 6, addr >> 8, addr & 0xFFFF, value >> 8, value & 0xFFFF];
+        let crc = this.crc(data);
+
+        let writer = this.port.writable.getWriter();
+        await writer.write(new Uint8Array([...data, ...crc]));
+        writer.releaseLock();
+        return;
+    }
+
     // 串口读取
     async serialRead(expectId, expectFun) {
         // 获取读取器
@@ -78,7 +133,7 @@ class ModBusRTUMaster {
         try {
             reader = this.port.readable.getReader();
         } catch (error) {
-            throw new Error("获取读取器失败");
+            throw new Error(`获取读取器失败:${error}`);
         }
 
         // 以下为modbus主站响应实现
@@ -93,159 +148,94 @@ class ModBusRTUMaster {
         while (true) {
             const { value, done } = await reader.read();
 
-            try {
-                // 串口数据
-                for (let i = 0; i < value.length; i++) {
-                    originalData.push(value[i]);
-                }
-                console.log(originalData);
-
-                // ModBus指令解析
-                // 解析站号
-                if (step == 0) {
-                    id = originalData[dataCount];
-                    if (expectId != id) {
-                        throw new Error(`站号错误：${id}`);
-                    }
-                    console.log(`站号：${id}`);
-
-                    dataCount++;
-                    step++;
-                }
-
-                // 解析功能码
-                if (step == 1 && (originalData.length - dataCount > 0)) {
-                    fun = originalData[dataCount];
-                    if (expectFun != fun) {
-                        throw new Error(`功能码错误:${fun}`);
-                    }
-                    console.log(`功能码：${fun}`);
-
-                    dataCount++;
-                    step++;
-                }
-
-                // 解析数据
-                if (step == 2 && (originalData.length - dataCount > 0)) {
-                    if ([1, 2, 3, 4].includes(expectFun)) {
-                        dataLen = originalData[dataCount];
-                        console.log(`数据长度：${dataLen}`);
-
-                        dataCount++;
-                        step++;
-                    }
-                }
-
-                if (step == 3 && (originalData.length - dataCount >= dataLen)) {
-                    for (let i = 0; i < dataLen; i++) {
-                        data.push(originalData[dataCount]);
-                        dataCount++;
-                    }
-                    console.log(`数据：${data}`);
-
-                    step = 10;
-                }
-
-                // crc校验
-                if (step == 10 && (originalData.length - dataCount >= 2)) {
-                    let crc = this.crc(originalData.slice(0, originalData.length - 2));
-
-                    if (this.arrayEqual(crc, [originalData[dataCount], originalData[dataCount + 1]])) {
-                        reader.releaseLock();
-                        console.log("校验成功！");
-                        return data;
-                    } else {
-                        throw new Error("crc校验失败");
-                    }
-                }
-            } catch (error) {
-                reader.releaseLock();
-                throw new Error(`串口读取失败：${error}`);
-            }
-        }
-    }
-
-    // 04 读输入寄存器
-    async ReadInputRegistersAsync(id, addr, length) {
-        // 写指令
-        let addrH = addr >> 8;
-        let addrL = addr & 0xFFFF;
-        let lengthH = length >> 8;
-        let lengthL = length & 0xFFFF;
-
-        let data = new Uint8Array([id, 4, addrH, addrL, lengthH, lengthL]);
-        let crc = this.crc(data);
-
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([id, 4, addrH, addrL, lengthH, lengthL, crc[0], crc[1]]));
-        writer.releaseLock();
-
-        // 读返回值
-        let reader = this.port.readable.getReader();
-        let readValues = [];
-        while (true) {
-            const { value, done } = await reader.read();
-
+            // 串口数据
             for (let i = 0; i < value.length; i++) {
-                readValues.push(value[i]);
+                originalData.push(value[i]);
+            }
+            console.log(originalData);
+
+            // ModBus指令解析
+            // 解析站号
+            if (step === 0) {
+                id = originalData[dataCount];
+                if (expectId != id) {
+                    reader.releaseLock();
+                    throw new Error(`异常的站号，期望：${expectId}，接收：${id}`);
+                }
+                console.log(`站号：${id}`);
+
+                dataCount++;
+                step++;
             }
 
-            if (readValues.length >= 3) {
-                if (readValues.length == readValues[2] + 5) {
+            // 解析功能码
+            if (step === 1 && (originalData.length - dataCount) >= 2) {
+                fun = originalData[dataCount];
+                if (fun === expectFun + 0x80) {
+                    let exceptionCode = originalData[dataCount + 1];
                     reader.releaseLock();
-                    break;
+                    throw new Error(`异常功能码：${fun}，异常码:${exceptionCode}`);
+                } else if (expectFun != fun) {
+                    reader.releaseLock();
+                    throw new Error(`未知的功能码：${fun}`);
+                }
+                console.log(`功能码：${fun}`);
+
+                dataCount++;
+                step++;
+            }
+
+            // 解析数据
+            if (step === 2 && (originalData.length - dataCount) > 0) {
+                if ([1, 2, 3, 4].includes(expectFun)) {
+                    dataLen = originalData[dataCount];
+                    console.log(`数据长度：${dataLen}`);
+
+                    dataCount++;
+                    step++;
+                }
+            }
+
+            if (step === 3 && (originalData.length - dataCount) >= dataLen) {
+                for (let i = 0; i < dataLen; i++) {
+                    data.push(originalData[dataCount]);
+                    dataCount++;
+                }
+                console.log(`数据：${data}`);
+
+                step = 10;
+            }
+
+            // crc校验
+            if (step === 10 && (originalData.length - dataCount >= 2)) {
+                let crc = this.crc(originalData.slice(0, originalData.length - 2));
+
+                if (this.arrayEqual(crc, [originalData[dataCount], originalData[dataCount + 1]])) {
+                    reader.releaseLock();
+                    console.log("校验成功！");
+                    return data;
+                } else {
+                    reader.releaseLock();
+                    throw new Error("crc校验失败");
                 }
             }
         }
+    }
 
-        // crc校验
-        let calcCrc = this.crc(readValues.slice(0, readValues.length - 2));
-        let readCrc = readValues.slice(readValues.length - 2, readValues.length);
-        if (!this.arrayEqual(calcCrc, readCrc)) {
-            console.log("crc校验失败！");
-            return;
+    // modbus响应数据解析
+    MDResAnal(data) {
+        // 判断响应数据是否完整
+        if (data.length < 5) {
+            return false;
         }
 
-        // 输出
-        let result = [];
-        for (let i = 0; i < readValues[2]; i = i + 2) {
-            result.push([readValues[3 + i], readValues[3 + i + 1]]);
+        if ([1, 2, 3, 4].includes(data[1])) {
+            
         }
 
-        console.log(result);
-        return result;
+
+        // 如果响应数据完整返回true，返之false
     }
-
-    // 05 写单个线圈
-    async writeSingleCoilAsync(id, addr, value) {
-        let addrH = addr >> 8;
-        let addrL = addr & 0xFFFF;
-
-        let data = new Uint8Array([id, 5, addrH, addrL, value ? 0xff : 0, 0]);
-        let crc = this.crc(data);
-
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([id, 5, addrH, addrL, value ? 0xff : 0, 0, crc[0], crc[1]]));
-        writer.releaseLock();
-        return;
-    }
-
-    // 06 写单个保持寄存器
-    async WriteSingleRegister(id, addr, value) {
-        let addrH = addr >> 8;
-        let addrL = addr & 0xFFFF;
-        let valueH = value >> 8;
-        let valueL = value & 0xFFFF;
-
-        let data = new Uint8Array([id, 6, addrH, addrL, valueH, valueL]);
-        let crc = this.crc(data);
-
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([id, 6, addrH, addrL, valueH, valueL, crc[0], crc[1]]));
-        writer.releaseLock();
-        return;
-    }
-
 
 
     // crc校验生成

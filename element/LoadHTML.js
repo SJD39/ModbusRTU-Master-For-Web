@@ -13,7 +13,7 @@ class LoadHTML extends HTMLElement {
             return;
         }
 
-        if (this.getAttribute("timing") == "now") {
+        if (this.getAttribute("timing") === "now") {
             this.getHtml();
         }
     }

@@ -27,7 +27,7 @@ class Dropdown extends HTMLElement {
         });
 
         this.dropDownViewBox.addEventListener('click', () => {
-            if(this.dropDownUl.style.display == 'none'){
+            if(this.dropDownUl.style.display === 'none'){
                 this.show();
             }else{
                 this.hide();

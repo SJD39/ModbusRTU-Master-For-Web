@@ -30,7 +30,7 @@
         clickMenuBox.style.display = 'none';
 
         let station = window.prompt("请输入站号", "1");
-        if (station == null || station == "" || isNaN(Number(station))) {
+        if (station === null || station === "" || isNaN(Number(station))) {
             popupTip.innerText = "请正确输入站号";
             popupTip.duration = 2000;
             popupTip.popup();
@@ -39,7 +39,7 @@
             station = Number(station);
         }
         let addr = window.prompt("请输入地址", "0");
-        if (addr == null || addr == "" || isNaN(Number(addr))) {
+        if (addr === null || addr === "" || isNaN(Number(addr))) {
             popupTip.innerText = "请正确输入地址";
             popupTip.duration = 2000;
             popupTip.popup();
@@ -62,7 +62,7 @@
         clickMenuBox.style.display = 'none';
 
         let text = window.prompt("请输入文本", "Text");
-        if (text == null || text == "") {
+        if (text === null || text === "") {
             popupTip.innerText = "文本不能为空！";
             popupTip.duration = 2000;
             popupTip.popup();
@@ -81,7 +81,7 @@
         clickMenuBox.style.display = 'none';
 
         let station = window.prompt("请输入站号", "1");
-        if (station == null || station == "" || isNaN(Number(station))) {
+        if (station === null || station === "" || isNaN(Number(station))) {
             popupTip.innerText = "请正确输入站号";
             popupTip.duration = 2000;
             popupTip.popup();
@@ -90,7 +90,7 @@
             station = Number(station);
         }
         let addr = window.prompt("请输入地址", "0");
-        if (addr == null || addr == "" || isNaN(Number(addr))) {
+        if (addr === null || addr === "" || isNaN(Number(addr))) {
             popupTip.innerText = "请正确输入地址";
             popupTip.duration = 2000;
             popupTip.popup();
