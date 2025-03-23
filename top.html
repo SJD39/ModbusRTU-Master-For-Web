@@ -1,31 +1,74 @@
-<link rel="stylesheet" href="./css/top.css">
-<div class="top_shell shell">
-    <div class="top">
-        <div class="top_content">
-            <ul class="top_ul">
-                <li><single-choice id="runMode" value="1" options='["运行","编辑"]'></single-choice></li>
-                <li>清空画面</li>
-            </ul>
-            <ul class="top_ul">
-                <li>波特率：<drop-down id="baudRateDom" value="0" options='["9600","19200","115200"]'></drop-down></li>
-                <li>数据位：<drop-down id="dataBitsDom" value="1" options='["7","8"]'></drop-down></li>
-                <li>停止位：<drop-down id="stopBitsDom" value="0" options='["1","2"]'></drop-down></li>
-                <li>奇偶校验：<drop-down id="parityDom" value="0" options='["none","even","odd"]'></drop-down></li>
-                <li><button class="buttonWhite" onclick="openSerial()">打开串口</button></li>
-                <li>刷新率：<drop-down id="refreshRate" value="1" options='["100","500","1000"]'></drop-down>ms</li>
-            </ul>
-            <ul class="top_ul">
-                <button onclick="saveToCookie()">保存至Cookie</button>
-                <button onclick="readFromCookie()">从Cookie读取</button>
-                <button>保存至文件</button>
-                <button>从文件读取</button>
-            </ul>
-        </div>
+<style>
+    .top {
+        /* 定义边距、大小、边框、背景色 */
+        margin: 9px;
+        width: calc(100% - 18px);
+        height: 60px;
+        border-radius: 9px;
+        background-color: #39c5bb;
+    }
+
+    .top_content {
+        /* 定义大小、位置、颜色、子元素排列方式 */
+        width: 1600px;
+        height: 60px;
+        margin: 0 auto;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .top_ul {
+        display: flex;
+        align-items: center;
+    }
+
+    .top_ul>li {
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+</style>
+
+<div class="top">
+    <div class="top_content">
+        <ul class="top_ul">
+            <li><single-choice id="runMode" value="1" options='["运行","编辑"]'></single-choice></li>
+            <li>清空画面</li>
+        </ul>
+        <ul class="top_ul">
+            <li>波特率：<drop-down id="baudRateDom" value="0" options='["9600","19200","115200"]'></drop-down></li>
+            <li>数据位：<drop-down id="dataBitsDom" value="1" options='["7","8"]'></drop-down></li>
+            <li>停止位：<drop-down id="stopBitsDom" value="0" options='["1","2"]'></drop-down></li>
+            <li>奇偶校验：<drop-down id="parityDom" value="0" options='["none","even","odd"]'></drop-down></li>
+            <li><button class="buttonWhite" onclick="openSerial()">打开串口</button></li>
+            <li>刷新率：<drop-down id="refreshRate" value="1" options='["100","500","1000"]'></drop-down>ms</li>
+        </ul>
+        <ul class="top_ul">
+            <button onclick="saveToCookie()">保存至Cookie</button>
+            <button onclick="readFromCookie()">从Cookie读取</button>
+            <button>保存至文件</button>
+            <button>从文件读取</button>
+        </ul>
     </div>
 </div>
 
+
 <script>
     var master = new ModBusRTUMaster();
+    master.onReadCallback = function (timestamp, data) {
+        let dateStr = "";
+        dateStr = new Date(timestamp).toLocaleTimeString();
+
+        let dataStr = "";
+        for (let i = 0; i < data.length; i++) {
+            dataStr += data[i].toString(16).padStart(2, '0') + " ";
+        }
+
+        let li = document.createElement('li');
+        li.innerText = `${dateStr}：${dataStr}`;
+        body_record_ul.append(li);
+    }
 
     async function openSerial() {
         try {
@@ -37,15 +80,20 @@
             return;
         }
 
-        await master.port.open({
-            baudRate: Number(baudRateDom.getOption()),
-            dataBits: Number(dataBitsDom.getOption()),
-            stopBits: Number(stopBitsDom.getOption()),
-            parity: parityDom.getOption(),
-            bufferSize: 1024,
-            flowControl: "none"
-        });
-
+        try {
+            await master.startMaster({
+                baudRate: Number(baudRateDom.getOption()),
+                dataBits: Number(dataBitsDom.getOption()),
+                stopBits: Number(stopBitsDom.getOption()),
+                parity: parityDom.getOption(),
+                bufferSize: 1024,
+                flowControl: "none"
+            });
+        } catch (error) {
+            popupTip.innerText = `主站运行错误！${error}`;
+            popupTip.duration = 2000;
+            popupTip.popup();
+        }
     }
 
     var timer;

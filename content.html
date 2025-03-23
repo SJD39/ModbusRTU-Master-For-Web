@@ -1,12 +1,111 @@
-<link rel="stylesheet" href="./css/content.css">
-<div class="body_content_shell shell" style="padding-top: 0;">
-    <div id="body_content">
+<style>
+    .body {
+        display: flex;
+        margin: 9px;
+        margin-bottom: 0px;
+        width: calc(100% - 18px);
+        height: calc(100% - 78px - 9px);
+
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #body_content {
+        width: calc(100% - 390px - 9px);
+        height: 100%;
+
+        background-color: #39c5bb;
+        border-radius: 9px;
+    }
+
+    #body_record {
+        width: 390px;
+        height: 100%;
+        padding: 20px;
+
+        background-color: #39c5bb;
+        border-radius: 9px;
+
+        display: flex;
+        flex-wrap: wrap;
+        align-content: space-between;
+    }
+
+    #body_record_ul{
+        color: #fff;
+        width: 100%;
+        height: calc(100% - 100px - 20px);
         
+        overflow-y: scroll;
+    }
+
+    #body_record_ul::-webkit-scrollbar{
+        width: 0;
+    }
+
+    #body_record_ul li{
+        padding: 12px;
+    }
+
+    #body_record_ul li:hover{
+        background-color: #ffffff39;
+    }
+
+    #body_record_sendBox{
+        width: 100%;
+        height: 100px;
+
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #body_record_sendBox_left textarea{
+        width: 100%;
+        height: 100%;
+
+        border-radius: 9px;
+        background-color: #ffffff39;
+        color: #fff;
+        padding: 12px;
+    }
+
+    #body_record_sendBox_left{
+        width: calc(100% - 120px - 10px);
+        height: 100px;
+    }
+
+    #body_record_sendBox_right{
+        width: 120px;
+        height: 100px;
+        
+        display: flex;
+        flex-wrap: wrap;
+        align-content: space-between;
+    }
+
+    #body_record_sendBox_right button{
+        width: 100%;
+        height: 45px;
+    }
+</style>
+<div class="body">
+    <div id="body_content"></div>
+    <div id="body_record">
+        <ul id="body_record_ul"></ul>
+        <div id="body_record_sendBox">
+            <div id="body_record_sendBox_left">
+                <textarea></textarea>
+            </div>
+            <div id="body_record_sendBox_right">
+                <button class="buttonWhite">生成MD指令</button>
+                <button class="buttonWhite">发送</button>
+            </div>
+        </div>
     </div>
 </div>
 <script>
     class ElementMgr {
-        constructor(){
+        constructor() {
             this.elements;
         }
 

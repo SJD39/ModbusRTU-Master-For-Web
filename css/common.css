@@ -1,36 +1,49 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 
     user-select: none;
+    font-size: 16px;
+
+    /* 禁止调整大小 */
+    resize: none;
+
+    /* 清除默认边框 */
+    border: none;
+    outline: none;
 }
 
-body,
-html {
+/* 清除所有滚动条 */
+*::-webkit-scrollbar{
+    width: 0;
+}
+
+html,
+body {
     width: 100%;
     height: 100%;
+}
+
+/* 很莫名其妙，不知道为什么body不在顶上 */
+body{
+    position: absolute;
+    top: 0;
 }
 
 li {
     list-style: none;
 }
 
-.shell{
-    padding: 10px;
-}
-
 .buttonWhite {
-    padding: 8px;
-
-    background-color: transparent;
+    background-color: #ffffff39;
     color: #fff;
 
-    border: #fff 1px solid;
     border-radius: 9px;
+    transition: all 0.2s;
 }
 
-.buttonWhite:hover{
+.buttonWhite:hover {
     background-color: #fff;
     color: #39c5bb;
-    border: #39c5bb 1px solid;
 }

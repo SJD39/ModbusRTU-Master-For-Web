@@ -2,13 +2,142 @@
 class ModBusRTUMaster {
     constructor() {
         this.port = null;
+        this.reader;
+        this.writer;
 
         this.taskQueue = [];
         this.taskRunning = false;
 
         this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
         this.analysisEn = false;
+
+        this.mdBuffer = [];
+
+        this.onReadCallback = () => { };
     }
+
+    // 启动主站
+    async startMaster(options) {
+        try {
+            await this.port.open(options);
+            this.reader = this.port.readable.getReader();
+            this.writer = this.port.writable.getWriter();
+        } catch {
+            throw new Error(`串口初始化失败:${error}`);
+        }
+
+        await this.serialRead();
+
+        return;
+    }
+
+    // 串口读取
+    async serialRead() {
+        let data = [];
+        while (true) {
+            data = [];
+            const { value, done } = await this.reader.read();
+
+            // 串口数据
+            for (let i = 0; i < value.length; i++) {
+                this.mdBuffer.push(value[i]);
+                data.push(value[i]);
+            }
+
+            // 回调
+            this.onReadCallback(Date.now(), data);
+        }
+    }
+
+    // 串口读取
+    async mdParse() {
+        // 以下为modbus主站响应实现
+        let originalData = [];
+        let id;
+        let fun;
+        let dataLen;
+        let data = [];
+
+        let step = 0;
+        let dataCount = 0;
+        while (true) {
+            const { value, done } = await reader.read();
+
+            // 串口数据
+            for (let i = 0; i < value.length; i++) {
+                originalData.push(value[i]);
+            }
+            console.log(originalData);
+
+            // ModBus指令解析
+            // 解析站号
+            if (step === 0) {
+                id = originalData[dataCount];
+                if (expectId != id) {
+                    reader.releaseLock();
+                    throw new Error(`异常的站号，期望：${expectId}，接收：${id}`);
+                }
+                console.log(`站号：${id}`);
+
+                dataCount++;
+                step++;
+            }
+
+            // 解析功能码
+            if (step === 1 && (originalData.length - dataCount) >= 2) {
+                fun = originalData[dataCount];
+                if (fun === expectFun + 0x80) {
+                    let exceptionCode = originalData[dataCount + 1];
+                    reader.releaseLock();
+                    throw new Error(`异常功能码：${fun}，异常码:${exceptionCode}`);
+                } else if (expectFun != fun) {
+                    reader.releaseLock();
+                    throw new Error(`未知的功能码：${fun}`);
+                }
+                console.log(`功能码：${fun}`);
+
+                dataCount++;
+                step++;
+            }
+
+            // 解析数据
+            if (step === 2 && (originalData.length - dataCount) > 0) {
+                if ([1, 2, 3, 4].includes(expectFun)) {
+                    dataLen = originalData[dataCount];
+                    console.log(`数据长度：${dataLen}`);
+
+                    dataCount++;
+                    step++;
+                }
+            }
+
+            if (step === 3 && (originalData.length - dataCount) >= dataLen) {
+                for (let i = 0; i < dataLen; i++) {
+                    data.push(originalData[dataCount]);
+                    dataCount++;
+                }
+                console.log(`数据：${data}`);
+
+                step = 10;
+            }
+
+            // crc校验
+            if (step === 10 && (originalData.length - dataCount >= 2)) {
+                let crc = this.crc(originalData.slice(0, originalData.length - 2));
+
+                if (this.arrayEqual(crc, [originalData[dataCount], originalData[dataCount + 1]])) {
+                    reader.releaseLock();
+                    console.log("校验成功！");
+                    return data;
+                } else {
+                    reader.releaseLock();
+                    throw new Error("crc校验失败");
+                }
+            }
+        }
+    }
+
+
 
     // 变更状态为忙碌
     async busy() {
@@ -126,102 +255,6 @@ class ModBusRTUMaster {
         return;
     }
 
-    // 串口读取
-    async serialRead(expectId, expectFun) {
-        // 获取读取器
-        let reader;
-        try {
-            reader = this.port.readable.getReader();
-        } catch (error) {
-            throw new Error(`获取读取器失败:${error}`);
-        }
-
-        // 以下为modbus主站响应实现
-        let originalData = [];
-        let id;
-        let fun;
-        let dataLen;
-        let data = [];
-
-        let step = 0;
-        let dataCount = 0;
-        while (true) {
-            const { value, done } = await reader.read();
-
-            // 串口数据
-            for (let i = 0; i < value.length; i++) {
-                originalData.push(value[i]);
-            }
-            console.log(originalData);
-
-            // ModBus指令解析
-            // 解析站号
-            if (step === 0) {
-                id = originalData[dataCount];
-                if (expectId != id) {
-                    reader.releaseLock();
-                    throw new Error(`异常的站号，期望：${expectId}，接收：${id}`);
-                }
-                console.log(`站号：${id}`);
-
-                dataCount++;
-                step++;
-            }
-
-            // 解析功能码
-            if (step === 1 && (originalData.length - dataCount) >= 2) {
-                fun = originalData[dataCount];
-                if (fun === expectFun + 0x80) {
-                    let exceptionCode = originalData[dataCount + 1];
-                    reader.releaseLock();
-                    throw new Error(`异常功能码：${fun}，异常码:${exceptionCode}`);
-                } else if (expectFun != fun) {
-                    reader.releaseLock();
-                    throw new Error(`未知的功能码：${fun}`);
-                }
-                console.log(`功能码：${fun}`);
-
-                dataCount++;
-                step++;
-            }
-
-            // 解析数据
-            if (step === 2 && (originalData.length - dataCount) > 0) {
-                if ([1, 2, 3, 4].includes(expectFun)) {
-                    dataLen = originalData[dataCount];
-                    console.log(`数据长度：${dataLen}`);
-
-                    dataCount++;
-                    step++;
-                }
-            }
-
-            if (step === 3 && (originalData.length - dataCount) >= dataLen) {
-                for (let i = 0; i < dataLen; i++) {
-                    data.push(originalData[dataCount]);
-                    dataCount++;
-                }
-                console.log(`数据：${data}`);
-
-                step = 10;
-            }
-
-            // crc校验
-            if (step === 10 && (originalData.length - dataCount >= 2)) {
-                let crc = this.crc(originalData.slice(0, originalData.length - 2));
-
-                if (this.arrayEqual(crc, [originalData[dataCount], originalData[dataCount + 1]])) {
-                    reader.releaseLock();
-                    console.log("校验成功！");
-                    return data;
-                } else {
-                    reader.releaseLock();
-                    throw new Error("crc校验失败");
-                }
-            }
-        }
-    }
-
     // modbus响应数据解析
     MDResAnal(data) {
         // 判断响应数据是否完整
@@ -230,7 +263,7 @@ class ModBusRTUMaster {
         }
 
         if ([1, 2, 3, 4].includes(data[1])) {
-            
+
         }
 
 
