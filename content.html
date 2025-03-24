@@ -31,27 +31,27 @@
         align-content: space-between;
     }
 
-    #body_record_ul{
+    #body_record_ul {
         color: #fff;
         width: 100%;
         height: calc(100% - 100px - 20px);
-        
+
         overflow-y: scroll;
     }
 
-    #body_record_ul::-webkit-scrollbar{
+    #body_record_ul::-webkit-scrollbar {
         width: 0;
     }
 
-    #body_record_ul li{
+    #body_record_ul li {
         padding: 12px;
     }
 
-    #body_record_ul li:hover{
+    #body_record_ul li:hover {
         background-color: #ffffff39;
     }
 
-    #body_record_sendBox{
+    #body_record_sendBox {
         width: 100%;
         height: 100px;
 
@@ -59,7 +59,7 @@
         justify-content: space-between;
     }
 
-    #body_record_sendBox_left textarea{
+    #body_record_sendBox_left textarea {
         width: 100%;
         height: 100%;
 
@@ -69,21 +69,21 @@
         padding: 12px;
     }
 
-    #body_record_sendBox_left{
+    #body_record_sendBox_left {
         width: calc(100% - 120px - 10px);
         height: 100px;
     }
 
-    #body_record_sendBox_right{
+    #body_record_sendBox_right {
         width: 120px;
         height: 100px;
-        
+
         display: flex;
         flex-wrap: wrap;
         align-content: space-between;
     }
 
-    #body_record_sendBox_right button{
+    #body_record_sendBox_right my-button {
         width: 100%;
         height: 45px;
     }
@@ -97,8 +97,8 @@
                 <textarea></textarea>
             </div>
             <div id="body_record_sendBox_right">
-                <button class="buttonWhite">生成MD指令</button>
-                <button class="buttonWhite">发送</button>
+                <my-button>生成MD指令</my-button>
+                <my-button>发送</my-button>
             </div>
         </div>
     </div>

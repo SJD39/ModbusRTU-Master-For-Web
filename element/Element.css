@@ -105,3 +105,38 @@
     border-radius: 4px;
     display: none;
 }
+
+.my_button {
+    background-color: #ffffff39;
+    color: #fff;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 9px;
+    transition: all 0.2s;
+}
+
+.my_button:hover {
+    background-color: #fff;
+    color: #39c5bb;
+}
+
+@keyframes buttonDown{
+    0%{
+        transform: scale(1);
+    }
+    100%{
+        transform: scale(0.9);
+    }
+}
+
+@keyframes buttonUp{
+    0%{
+        transform: scale(0.9);
+    }
+    100%{
+        transform: scale(1);
+    }
+}

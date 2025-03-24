@@ -35,15 +35,3 @@ li {
     list-style: none;
 }
 
-.buttonWhite {
-    background-color: #ffffff39;
-    color: #fff;
-
-    border-radius: 9px;
-    transition: all 0.2s;
-}
-
-.buttonWhite:hover {
-    background-color: #fff;
-    color: #39c5bb;
-}

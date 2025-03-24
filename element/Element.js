@@ -1,15 +1,21 @@
+class InputElement extends HTMLElement {
+    constructor() {
+        super();
+    }
 
+    getValue() {
+        return this.value;
+    }
+}
 
-
-
-class Dropdown extends HTMLElement {
+class Dropdown extends InputElement {
     constructor() {
         super();
     }
 
     connectedCallback() {
         this.options = JSON.parse(this.getAttribute("options"));
-        
+
         this.dropDownViewBox = document.createElement('div');
         this.dropDownView = document.createElement('span');
         this.dropDownUl = document.createElement('ul');
@@ -31,9 +37,9 @@ class Dropdown extends HTMLElement {
         });
 
         this.dropDownViewBox.addEventListener('click', () => {
-            if(this.dropDownUl.style.display === 'none'){
+            if (this.dropDownUl.style.display === 'none') {
                 this.show();
-            }else{
+            } else {
                 this.hide();
             }
         });
@@ -43,9 +49,9 @@ class Dropdown extends HTMLElement {
 
         // 初始化值
         this.value = 0;
-        if(this.hasAttribute("value")){
+        if (this.hasAttribute("value")) {
             this.setValue(this.getAttribute("value"));
-        }else{
+        } else {
             this.setValue(0);
         }
     }
@@ -68,24 +74,20 @@ class Dropdown extends HTMLElement {
         this.dropDownUl.style.zIndex = 0;
     }
 
-    getValue() {
-        return this.value;
-    }
-
-    getOption(){
+    getOption() {
         return this.options[this.value];
     }
 }
 
 customElements.define("drop-down", Dropdown);
 
-class SingleChoice extends HTMLElement {
+class SingleChoice extends InputElement {
     constructor() {
         super();
     }
 
     connectedCallback() {
-        this.clickCallback = function(){};
+        this.clickCallback = function () { };
         this.options = JSON.parse(this.getAttribute("options"));
 
         this.liElements = [];
@@ -125,28 +127,24 @@ class SingleChoice extends HTMLElement {
         this.value = id;
     }
 
-    getValue() {
-        return this.value;
-    }
-
-    getOption(){
+    getOption() {
         return this.options[this.value];
     }
 }
 
 customElements.define("single-choice", SingleChoice);
 
-class PopupTip extends HTMLElement{
-    constructor(){
+class PopupTip extends HTMLElement {
+    constructor() {
         super();
     }
 
-    connectedCallback(){
+    connectedCallback() {
         this.className = 'popupTipBox';
         this.duration = 1000;
     }
 
-    popup(){
+    popup() {
         this.style.display = 'block';
         this.style.animation = 'popupTipPopup 0.5s ease-out forwards';
         setTimeout(() => {
@@ -159,3 +157,29 @@ class PopupTip extends HTMLElement{
 }
 
 customElements.define("popup-tip", PopupTip);
+
+class Button extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.className = 'my_button';
+
+        // 点击事件
+        this.addEventListener('mousedown', () => {
+            // 点击动画
+            this.style.animation = 'buttonDown 0.1s ease-out forwards';
+
+            document.addEventListener('mouseup', () => {
+                this.style.animation = 'buttonUp 0.05s ease-out forwards';
+
+                // 用户callback
+                if (this.hasAttribute('onClick')) {
+                    this.getAttribute('onClick');
+                }
+            });
+        });
+    }
+}
+customElements.define("my-button", Button);

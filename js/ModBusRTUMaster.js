@@ -6,8 +6,9 @@ class ModBusRTUMaster {
 
         this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
 
+        // md解析
         this.mdBuffer = [];
-        this.mdParseStep
+        this.mdOriginal = [];
 
         this.onReadCallback = () => { };
     }
@@ -29,6 +30,7 @@ class ModBusRTUMaster {
     // 串口读取
     async serialRead() {
         let data = [];
+
         while (true) {
             data = [];
             const { value, done } = await this.reader.read();
@@ -38,98 +40,150 @@ class ModBusRTUMaster {
                 data.push(value[i]);
             }
 
-            // 串口数据解析
-            this.mdParse(data);
+            // 推入处理缓冲区
+            this.mdBuffer = [...this.mdBuffer, ...data];
 
             // 回调
             this.onReadCallback(Date.now(), data);
         }
     }
 
-    // 串口读取
-    async mdParse(data) {
+    // 01 读线圈
+    async readCoilsAsync(id, addr, len) {
+        await this.busy();
 
+        // 写指令
+        let data = [id, 1, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
+        let crc = this.crc(data);
 
+        this.mdBuffer = [];
+        await this.writer.write(new Uint8Array([...data, ...crc]));
 
-        let originalData = [];
-        let id;
-        let fun;
-        let dataLen;
-        let data = [];
+        // 读返回值
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
+        const result = this.mdParse(id, 1, addr, len);
 
-        let step = 0;
-        let dataCount = 0;
+        try {
+            await Promise.race([result, timeoutPromise]);
+        } catch (error) {
+            throw new Error(`modbus解析错误：${error}`);
+        } finally {
+            this.taskRunning = false;
+        }
+
+        console.log(result);
+        return result["data"] === 1 ? true : false;
+    }
+
+    // MD解析
+    async mdParse(outId, outFunCode, outAddr, outDataLen) {
+        let mdParseStep = 0;
+        let mdOriginal = [];
+        let mdParseResult = {};
+
         while (true) {
-            const { value, done } = await reader.read();
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-            // 串口数据
-            for (let i = 0; i < value.length; i++) {
-                originalData.push(value[i]);
-            }
-            console.log(originalData);
-
-            // ModBus指令解析
-            // 解析站号
-            if (step === 0) {
-                id = originalData[dataCount];
-                if (expectId != id) {
-                    reader.releaseLock();
-                    throw new Error(`异常的站号，期望：${expectId}，接收：${id}`);
+            // 读取站号
+            if (mdParseStep === 0) {
+                if (this.mdBuffer.length === 0) {
+                    continue;
                 }
-                console.log(`站号：${id}`);
+                mdParseResult["slaveId"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["slaveId"]);
 
-                dataCount++;
-                step++;
+                mdParseStep = 1;
             }
 
-            // 解析功能码
-            if (step === 1 && (originalData.length - dataCount) >= 2) {
-                fun = originalData[dataCount];
-                if (fun === expectFun + 0x80) {
-                    let exceptionCode = originalData[dataCount + 1];
-                    reader.releaseLock();
-                    throw new Error(`异常功能码：${fun}，异常码:${exceptionCode}`);
-                } else if (expectFun != fun) {
-                    reader.releaseLock();
-                    throw new Error(`未知的功能码：${fun}`);
+            // 读取功能码
+            if (mdParseStep === 1) {
+                if (this.mdBuffer.length === 0) {
+                    continue;
                 }
-                console.log(`功能码：${fun}`);
+                mdParseResult["funCode"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["funCode"]);
 
-                dataCount++;
-                step++;
-            }
-
-            // 解析数据
-            if (step === 2 && (originalData.length - dataCount) > 0) {
-                if ([1, 2, 3, 4].includes(expectFun)) {
-                    dataLen = originalData[dataCount];
-                    console.log(`数据长度：${dataLen}`);
-
-                    dataCount++;
-                    step++;
+                if (mdParseResult["funCode"] > 128) {
+                    // 读错误码
+                    mdParseStep = 2;
+                } else if ([1, 2, 3, 4].includes(mdParseResult["funCode"])) {
+                    // 有数据长度
+                    mdParseStep = 3;
+                } else if ([5, 6, 21, 22].includes(mdParseResult["funCode"])) {
+                    // 无数据长度
+                    mdParseStep = 4;
+                } else {
+                    throw new Error(`未知的功能码：${mdParseResult["funCode"].toString(16).padStart(2, '0')}`);
                 }
             }
 
-            if (step === 3 && (originalData.length - dataCount) >= dataLen) {
-                for (let i = 0; i < dataLen; i++) {
-                    data.push(originalData[dataCount]);
-                    dataCount++;
+            // 读取错误码
+            if (mdParseStep === 2) {
+                if (this.mdBuffer.length === 0) {
+                    continue;
                 }
-                console.log(`数据：${data}`);
+                mdParseResult["errorCode"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["errorCode"]);
 
-                step = 10;
+                mdParseStep = 20;
+            }
+
+            // 读取数据长度
+            if (mdParseStep === 3) {
+                if (this.mdBuffer.length === 0) {
+                    continue;
+                }
+                mdParseResult["dataLen"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["dataLen"]);
+
+                mdParseStep = 10;
+            }
+
+            // 读取数据
+            if (mdParseStep === 4) {
+                if (this.mdBuffer.length < 4) {
+                    continue;
+                }
+                mdParseResult["data"] = this.mdBuffer.splice(0, 4);
+                mdOriginal.push(...mdParseResult["data"]);
+
+                mdParseStep = 20;
+            }
+
+            // 根据长度读数据
+            if (mdParseStep === 10) {
+                if ([1, 2].includes(mdParseResult["funCode"])) {
+                    // 处理读线圈特殊情况
+                    if (outDataLen % 8 !== 0) {
+                        if (this.mdBuffer.length < (mdParseResult["dataLen"] + 1)) {
+                            continue;
+                        }
+                        mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"] + 1);
+                        mdOriginal.push(...mdParseResult["data"]);
+                    }else{
+                        if (this.mdBuffer.length < mdParseResult["dataLen"]) {
+                            continue;
+                        }
+                        mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"]);
+                        mdOriginal.push(...mdParseResult["data"]);
+                    }
+                } else if ([3, 4].includes(mdParseResult["funCode"])) {
+                    // 处理读寄存器情况
+                    if (this.mdBuffer.length < (mdParseResult["dataLen"] * 2)) {
+                        continue;
+                    }
+                    mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"] * 2);
+                    mdOriginal.push(...mdParseResult["data"]);
+                }
+
+                mdParseStep = 20;
             }
 
             // crc校验
-            if (step === 10 && (originalData.length - dataCount >= 2)) {
-                let crc = this.crc(originalData.slice(0, originalData.length - 2));
-
-                if (this.arrayEqual(crc, [originalData[dataCount], originalData[dataCount + 1]])) {
-                    reader.releaseLock();
-                    console.log("校验成功！");
-                    return data;
+            if (mdParseStep === 20) {
+                if (this.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
+                    return mdParseResult;
                 } else {
-                    reader.releaseLock();
                     throw new Error("crc校验失败");
                 }
             }
@@ -147,32 +201,7 @@ class ModBusRTUMaster {
         this.taskRunning = true;
     }
 
-    // 01 读线圈
-    async readCoilsAsync(id, addr, len) {
-        await this.busy();
 
-        // 写指令
-        let data = [id, 1, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
-        let crc = this.crc(data);
-
-        const writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([...data, ...crc]));
-        writer.releaseLock();
-
-        // 读返回值
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
-        const result = this.serialRead(id, 1);
-
-        try {
-            await Promise.race([result, timeoutPromise]);
-        } catch (error) {
-            throw new Error(`串口读取失败：${error}`);
-        } finally {
-            this.taskRunning = false;
-        }
-
-        return result[0] === 1 ? true : false;
-    }
 
     // 03 读保持寄存器
     async readHoldingRegistersAsync(id, addr, len) {
