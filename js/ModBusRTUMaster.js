@@ -1,17 +1,13 @@
-// ver1.0.0
 class ModBusRTUMaster {
     constructor() {
         this.port = null;
         this.reader;
         this.writer;
 
-        this.taskQueue = [];
-        this.taskRunning = false;
-
         this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
-        this.analysisEn = false;
 
         this.mdBuffer = [];
+        this.mdParseStep
 
         this.onReadCallback = () => { };
     }
@@ -27,7 +23,6 @@ class ModBusRTUMaster {
         }
 
         await this.serialRead();
-
         return;
     }
 
@@ -40,9 +35,11 @@ class ModBusRTUMaster {
 
             // 串口数据
             for (let i = 0; i < value.length; i++) {
-                this.mdBuffer.push(value[i]);
                 data.push(value[i]);
             }
+
+            // 串口数据解析
+            this.mdParse(data);
 
             // 回调
             this.onReadCallback(Date.now(), data);
@@ -50,8 +47,10 @@ class ModBusRTUMaster {
     }
 
     // 串口读取
-    async mdParse() {
-        // 以下为modbus主站响应实现
+    async mdParse(data) {
+
+
+
         let originalData = [];
         let id;
         let fun;
