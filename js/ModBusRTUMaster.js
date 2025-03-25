@@ -11,6 +11,7 @@ class ModBusRTUMaster {
         this.mdOriginal = [];
 
         this.onReadCallback = () => { };
+        this.onMdParseCallback = () => { };
     }
 
     // 启动主站
@@ -60,148 +61,20 @@ class ModBusRTUMaster {
         await this.writer.write(new Uint8Array([...data, ...crc]));
 
         // 读返回值
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
-        const result = this.mdParse(id, 1, addr, len);
+        let result;
+        let timer = setTimeout(() => { throw new Error(`超时`) }, 1000);
 
         try {
-            await Promise.race([result, timeoutPromise]);
-        } catch (error) {
+            result = await this.mdParse(id, 1, addr, len);
+        } catch {
             throw new Error(`modbus解析错误：${error}`);
         } finally {
+            clearTimeout(timer);
             this.taskRunning = false;
         }
 
-        console.log(result);
-        return result["data"] === 1 ? true : false;
+        return result["data"];
     }
-
-    // MD解析
-    async mdParse(outId, outFunCode, outAddr, outDataLen) {
-        let mdParseStep = 0;
-        let mdOriginal = [];
-        let mdParseResult = {};
-
-        while (true) {
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            // 读取站号
-            if (mdParseStep === 0) {
-                if (this.mdBuffer.length === 0) {
-                    continue;
-                }
-                mdParseResult["slaveId"] = this.mdBuffer.shift();
-                mdOriginal.push(mdParseResult["slaveId"]);
-
-                mdParseStep = 1;
-            }
-
-            // 读取功能码
-            if (mdParseStep === 1) {
-                if (this.mdBuffer.length === 0) {
-                    continue;
-                }
-                mdParseResult["funCode"] = this.mdBuffer.shift();
-                mdOriginal.push(mdParseResult["funCode"]);
-
-                if (mdParseResult["funCode"] > 128) {
-                    // 读错误码
-                    mdParseStep = 2;
-                } else if ([1, 2, 3, 4].includes(mdParseResult["funCode"])) {
-                    // 有数据长度
-                    mdParseStep = 3;
-                } else if ([5, 6, 21, 22].includes(mdParseResult["funCode"])) {
-                    // 无数据长度
-                    mdParseStep = 4;
-                } else {
-                    throw new Error(`未知的功能码：${mdParseResult["funCode"].toString(16).padStart(2, '0')}`);
-                }
-            }
-
-            // 读取错误码
-            if (mdParseStep === 2) {
-                if (this.mdBuffer.length === 0) {
-                    continue;
-                }
-                mdParseResult["errorCode"] = this.mdBuffer.shift();
-                mdOriginal.push(mdParseResult["errorCode"]);
-
-                mdParseStep = 20;
-            }
-
-            // 读取数据长度
-            if (mdParseStep === 3) {
-                if (this.mdBuffer.length === 0) {
-                    continue;
-                }
-                mdParseResult["dataLen"] = this.mdBuffer.shift();
-                mdOriginal.push(mdParseResult["dataLen"]);
-
-                mdParseStep = 10;
-            }
-
-            // 读取数据
-            if (mdParseStep === 4) {
-                if (this.mdBuffer.length < 4) {
-                    continue;
-                }
-                mdParseResult["data"] = this.mdBuffer.splice(0, 4);
-                mdOriginal.push(...mdParseResult["data"]);
-
-                mdParseStep = 20;
-            }
-
-            // 根据长度读数据
-            if (mdParseStep === 10) {
-                if ([1, 2].includes(mdParseResult["funCode"])) {
-                    // 处理读线圈特殊情况
-                    if (outDataLen % 8 !== 0) {
-                        if (this.mdBuffer.length < (mdParseResult["dataLen"] + 1)) {
-                            continue;
-                        }
-                        mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"] + 1);
-                        mdOriginal.push(...mdParseResult["data"]);
-                    }else{
-                        if (this.mdBuffer.length < mdParseResult["dataLen"]) {
-                            continue;
-                        }
-                        mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"]);
-                        mdOriginal.push(...mdParseResult["data"]);
-                    }
-                } else if ([3, 4].includes(mdParseResult["funCode"])) {
-                    // 处理读寄存器情况
-                    if (this.mdBuffer.length < (mdParseResult["dataLen"] * 2)) {
-                        continue;
-                    }
-                    mdParseResult["data"] = this.mdBuffer.splice(0, mdParseResult["dataLen"] * 2);
-                    mdOriginal.push(...mdParseResult["data"]);
-                }
-
-                mdParseStep = 20;
-            }
-
-            // crc校验
-            if (mdParseStep === 20) {
-                if (this.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
-                    return mdParseResult;
-                } else {
-                    throw new Error("crc校验失败");
-                }
-            }
-        }
-    }
-
-
-
-    // 变更状态为忙碌
-    async busy() {
-        while (this.taskRunning) {
-            console.log("等待中。。。");
-            await new Promise(resolve => setTimeout(resolve, 10));
-        }
-        this.taskRunning = true;
-    }
-
-
 
     // 03 读保持寄存器
     async readHoldingRegistersAsync(id, addr, len) {
@@ -211,23 +84,23 @@ class ModBusRTUMaster {
         let data = [id, 3, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
         let crc = this.crc(data);
 
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([...data, ...crc]));
-        writer.releaseLock();
+        this.mdBuffer = [];
+        await this.writer.write(new Uint8Array([...data, ...crc]));
 
         // 读返回值
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
-        const result = this.serialRead(id, 3);
+        let result;
+        let timer = setTimeout(() => { throw new Error(`超时`) }, 1000);
 
         try {
-            await Promise.race([result, timeoutPromise]);
-        } catch (error) {
-            throw new Error(`串口读取失败：${error}`);
+            result = await this.mdParse(id, 3, addr, len);
+        } catch {
+            throw new Error(`modbus解析错误：${error}`);
         } finally {
+            clearTimeout(timer);
             this.taskRunning = false;
         }
 
-        return result;
+        return result["data"];
     }
 
     // 04 读输入寄存器
@@ -238,19 +111,19 @@ class ModBusRTUMaster {
         let data = [id, 4, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
         let crc = this.crc(data);
 
-        let writer = this.port.writable.getWriter();
+        this.mdBuffer = [];
         await writer.write(new Uint8Array([...data, ...crc]));
-        writer.releaseLock();
 
         // 读返回值
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("超时")), 1000));
-        const result = this.serialRead(id, 4);
+        let result;
+        let timer = setTimeout(() => { throw new Error(`超时`) }, 1000);
 
         try {
-            await Promise.race([result, timeoutPromise]);
-        } catch (error) {
-            throw new Error(`串口读取失败：${error}`);
+            result = await this.mdParse(id, 4, addr, len);
+        } catch {
+            throw new Error(`modbus解析错误：${error}`);
         } finally {
+            clearTimeout(timer);
             this.taskRunning = false;
         }
 
@@ -264,10 +137,23 @@ class ModBusRTUMaster {
         let data = [id, 5, addr >> 8, addr & 0xFFFF, value ? 0xff : 0, 0];
         let crc = this.crc(data);
 
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([...data, ...crc]));
-        writer.releaseLock();
-        return;
+        this.mdBuffer = [];
+        this.writer.write(new Uint8Array([...data, ...crc]));
+
+        // 读返回值
+        let result;
+        let timer = setTimeout(() => { throw new Error(`超时`) }, 1000);
+
+        try {
+            result = await this.mdParse();
+        } catch {
+            throw new Error(`modbus解析错误：${error}`);
+        } finally {
+            clearTimeout(timer);
+            this.taskRunning = false;
+        }
+
+        return result["数据"];
     }
 
     // 06 写单个保持寄存器
@@ -277,27 +163,132 @@ class ModBusRTUMaster {
         let data = [id, 6, addr >> 8, addr & 0xFFFF, value >> 8, value & 0xFFFF];
         let crc = this.crc(data);
 
-        let writer = this.port.writable.getWriter();
-        await writer.write(new Uint8Array([...data, ...crc]));
-        writer.releaseLock();
+        this.mdBuffer = [];
+        this.writer.write(new Uint8Array([...data, ...crc]));
+
+        // 读返回值
+        let result;
+        let timer = setTimeout(() => { throw new Error(`超时`) }, 1000);
+
+        try {
+            result = await this.mdParse();
+        } catch {
+            throw new Error(`modbus解析错误：${error}`);
+        } finally {
+            clearTimeout(timer);
+            this.taskRunning = false;
+        }
+
         return;
     }
 
-    // modbus响应数据解析
-    MDResAnal(data) {
-        // 判断响应数据是否完整
-        if (data.length < 5) {
-            return false;
+    // MD解析
+    async mdParse(outId, outFunCode, outAddr, outDataLen) {
+        let mdParseStep = 0;
+        let mdOriginal = [];
+        let mdParseResult = {};
+
+        while (true) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+
+            if (this.mdBuffer.length === 0) {
+                continue;
+            }
+
+            // 读取站号
+            if (mdParseStep === 0) {
+                mdParseResult["站号"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["站号"]);
+
+                mdParseStep = 1;
+            }
+
+            // 读取功能码
+            if (mdParseStep === 1) {
+                mdParseResult["功能码"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["功能码"]);
+
+                if (mdParseResult["功能码"] > 128) {
+                    // 读错误码
+                    mdParseStep = 2;
+                } else if ([1, 2, 3, 4].includes(mdParseResult["功能码"])) {
+                    // 有数据长度
+                    mdParseStep = 3;
+                } else if ([5, 6, 21, 22].includes(mdParseResult["功能码"])) {
+                    // 无数据长度
+                    mdParseStep = 4;
+                } else {
+                    throw new Error(`未知的功能码：${mdParseResult["功能码"].toString(16).padStart(2, '0')}`);
+                }
+            }
+
+            // 读取错误码
+            if (mdParseStep === 2) {
+                mdParseResult["异常码"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["异常码"]);
+
+                mdParseStep = 20;
+            }
+
+            // 读取数据长度
+            if (mdParseStep === 3) {
+                mdParseResult["数据长度"] = this.mdBuffer.shift();
+                mdOriginal.push(mdParseResult["数据长度"]);
+
+                mdParseStep = 10;
+            }
+
+            // 读取数据
+            if (mdParseStep === 4) {
+                if (this.mdBuffer.length < 4) {
+                    continue;
+                }
+                mdParseResult["数据"] = this.mdBuffer.splice(0, 4);
+                mdOriginal.push(...mdParseResult["数据"]);
+
+                mdParseStep = 20;
+            }
+
+            // 根据长度读数据
+            if (mdParseStep === 10) {
+                if ([1, 2].includes(mdParseResult["功能码"])) {
+                    if (this.mdBuffer.length < mdParseResult["数据长度"]) {
+                        continue;
+                    }
+                    mdParseResult["数据"] = this.mdBuffer.splice(0, mdParseResult["数据长度"]);
+                } else if ([3, 4].includes(mdParseResult["功能码"])) {
+                    if (this.mdBuffer.length < (mdParseResult["数据长度"] * 2)) {
+                        continue;
+                    }
+                    mdParseResult["数据"] = this.mdBuffer.splice(0, mdParseResult["数据长度"] * 2);
+                }
+                mdOriginal.push(...mdParseResult["数据"]);
+
+                mdParseStep = 20;
+            }
+
+            // crc校验
+            if (mdParseStep === 20) {
+                if (this.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
+                    break;
+                } else {
+                    throw new Error("crc校验失败");
+                }
+            }
         }
 
-        if ([1, 2, 3, 4].includes(data[1])) {
-
-        }
-
-
-        // 如果响应数据完整返回true，返之false
+        this.onMdParseCallback(Date.now(), mdParseResult);
+        return mdParseResult;
     }
 
+    // 变更状态为忙碌
+    async busy() {
+        while (this.taskRunning) {
+            console.log("等待中。。。");
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        this.taskRunning = true;
+    }
 
     // crc校验生成
     crc(data) {
@@ -316,6 +307,17 @@ class ModBusRTUMaster {
         }
 
         return [crcValue & 0xFF, crcValue >> 8];
+    }
+
+    // 发送MD指令
+    sendMd(data) {
+
+    }
+    // 生成MD指令
+    generateMD(id, funCode) {
+        let result = [];
+
+        return result;
     }
 
     // 数组对比

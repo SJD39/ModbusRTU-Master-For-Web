@@ -1,28 +1,17 @@
-class InputElement extends HTMLElement {
+class Dropdown extends HTMLElement {
     constructor() {
         super();
+        this.value = 0;
     }
 
-    getValue() {
-        return this.value;
-    }
-}
-
-class Dropdown extends InputElement {
-    constructor() {
-        super();
-    }
-
-    connectedCallback() {
-        this.options = JSON.parse(this.getAttribute("options"));
-
+    // 渲染
+    render() {
         this.dropDownViewBox = document.createElement('div');
         this.dropDownView = document.createElement('span');
         this.dropDownUl = document.createElement('ul');
 
         this.className = 'dropDownBox';
         this.dropDownViewBox.className = 'dropDownViewBox';
-        this.dropDownView.className = 'dropDownView';
         this.dropDownUl.className = 'dropDownUl';
         this.dropDownUl.style.display = 'none';
 
@@ -48,12 +37,10 @@ class Dropdown extends InputElement {
         this.append(this.dropDownViewBox, this.dropDownUl);
 
         // 初始化值
-        this.value = 0;
         if (this.hasAttribute("value")) {
-            this.setValue(this.getAttribute("value"));
-        } else {
-            this.setValue(0);
+            this.value = this.getAttribute("value");
         }
+        this.setValue(this.value);
     }
 
     // 设置值
@@ -65,13 +52,11 @@ class Dropdown extends InputElement {
     // 显示
     show() {
         this.dropDownUl.style.display = 'block';
-        this.dropDownUl.style.zIndex = 100;
     }
 
     // 隐藏选择
     hide() {
         this.dropDownUl.style.display = 'none';
-        this.dropDownUl.style.zIndex = 0;
     }
 
     getOption() {
@@ -81,7 +66,7 @@ class Dropdown extends InputElement {
 
 customElements.define("drop-down", Dropdown);
 
-class SingleChoice extends InputElement {
+class SingleChoice extends HTMLElement {
     constructor() {
         super();
     }
