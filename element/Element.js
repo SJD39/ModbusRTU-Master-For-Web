@@ -2,68 +2,60 @@ class Dropdown extends HTMLElement {
     constructor() {
         super();
         this.value = 0;
+        this.options = [];
+    }
+
+    connectedCallback() {
+        // 初始化值
+        if (this.hasAttribute("value")) {
+            this.value = this.getAttribute("value");
+        }
+        if (this.hasAttribute("options")) {
+            this.options = eval(this.getAttribute("options"));
+            this.render();
+        }
     }
 
     // 渲染
     render() {
-        this.dropDownViewBox = document.createElement('div');
         this.dropDownView = document.createElement('span');
-        this.dropDownUl = document.createElement('ul');
+        this.dropDownDialog = document.createElement('dialog');
+        this.dropDownMenu = document.createElement('menu');
 
         this.className = 'dropDownBox';
-        this.dropDownViewBox.className = 'dropDownViewBox';
-        this.dropDownUl.className = 'dropDownUl';
-        this.dropDownUl.style.display = 'none';
+        this.dropDownView.className = 'dropDownView';
+        this.dropDownDialog.className = 'dropDownDialog';
+        this.dropDownMenu.className = 'dropDownMenu';
 
         this.options.forEach((option, index) => {
             let li = document.createElement('li');
             li.innerText = option;
             li.addEventListener('click', () => {
-                this.setValue(index)
-                this.hide();
+                this.setValue(index);
+                this.dropDownDialog.close();
             });
-            this.dropDownUl.append(li);
+            this.dropDownMenu.append(li);
         });
 
-        this.dropDownViewBox.addEventListener('click', () => {
-            if (this.dropDownUl.style.display === 'none') {
-                this.show();
-            } else {
-                this.hide();
-            }
+        this.dropDownView.addEventListener('click', () => {
+            this.dropDownDialog.show();
         });
 
-        this.dropDownViewBox.append(this.dropDownView);
-        this.append(this.dropDownViewBox, this.dropDownUl);
+        this.dropDownDialog.append(this.dropDownMenu);
+        this.append(this.dropDownView, this.dropDownDialog);
 
-        // 初始化值
-        if (this.hasAttribute("value")) {
-            this.value = this.getAttribute("value");
-        }
         this.setValue(this.value);
     }
 
-    // 设置值
     setValue(id) {
         this.value = id;
-        this.dropDownView.innerText = this.options[this.value];
-    }
-
-    // 显示
-    show() {
-        this.dropDownUl.style.display = 'block';
-    }
-
-    // 隐藏选择
-    hide() {
-        this.dropDownUl.style.display = 'none';
+        this.dropDownView.innerText = this.getOption();
     }
 
     getOption() {
         return this.options[this.value];
     }
 }
-
 customElements.define("drop-down", Dropdown);
 
 class SingleChoice extends HTMLElement {

@@ -39,10 +39,6 @@
         overflow-y: scroll;
     }
 
-    #body_record_ul::-webkit-scrollbar {
-        width: 0;
-    }
-
     #body_record_ul li {
         padding: 12px;
     }
@@ -51,104 +47,83 @@
         background-color: #ffffff39;
     }
 
-    #body_record_sendBox {
-        position: relative;
-        width: 100%;
-        height: 100px;
+    #body_record_generateMd {
+        border-radius: 9px;
+        background-color: #ffffff39;
+        color: #fff;
 
+        width: 100%;
+        padding: 10px;
+    }
+
+    #body_record_generateMd_nec {
         display: flex;
         justify-content: space-between;
     }
 
-    #body_record_sendBox_left textarea {
+    #body_record_sendBox {
         width: 100%;
-        height: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
 
+    #body_record_sendBox textarea {
+        width: calc(100% - 120px - 10px);
+        height: 60px;
         border-radius: 9px;
         background-color: #ffffff39;
         color: #fff;
         padding: 12px;
     }
 
-    #body_record_sendBox_left {
-        width: calc(100% - 120px - 10px);
-        height: 100px;
-    }
-
-    #body_record_sendBox_right {
+    #body_record_sendBox my-button {
         width: 120px;
-        height: 100px;
-
-        display: flex;
-        flex-wrap: wrap;
-        align-content: space-between;
-    }
-
-    #body_record_sendBox_right my-button {
-        width: 100%;
-        height: 45px;
-    }
-
-    #body_record_sendBox_generateMd {
-        position: absolute;
-        top: -209px;
-
-        border-radius: 9px;
-        background-color: #ffffff39;
-
-        width: 100%;
-        height: 200px;
-    }
-
-    #body_record_sendBox_generateMd_line1 {
-        display: flex;
-        justify-content: space-between;
+        height: 60px;
     }
 </style>
-<script>
-    const mdFunName = [
-        "01 读线圈",
-        "02 读离散",
-        "03 读保持",
-        "04 读输入",
-        "05 写单线圈",
-        "06 写单保持",
-        "15 写多线圈",
-        "16 写多保持"
-    ];
-</script>
+
 <div class="body">
     <div id="body_content"></div>
     <div id="body_record">
         <ul id="body_record_ul"></ul>
+        <div id="body_record_generateMd">
+            <div id="body_record_generateMd_nec">
+                <span>站号：<input id="generateMd_id" type="number" min="0" max="247" /></span>
+                <span>
+                    功能：<drop-down id="generateMd_fun" style="width: 87.5px;"></drop-down>
+                    <script>
+                        const mdFunName = [
+                            "01 读线圈",
+                            "02 读离散",
+                            "03 读保持",
+                            "04 读输入",
+                            "05 写单线圈",
+                            "06 写单保持",
+                            "15 写多线圈",
+                            "16 写多保持"
+                        ];
+                        generateMd_fun.options = mdFunName;
+                        generateMd_fun.render();
+                    </script>
+                </span>
+            </div>
+            <div id="body_record_generateMd_read">
+
+            </div>
+            <div id="body_record_generateMd_writeSingle">
+
+            </div>
+            <div id="body_record_generateMd_writeMulti">
+                
+            </div>
+        </div>
         <div id="body_record_sendBox">
-            <div id="body_record_sendBox_generateMd" style="display: block;">
-                <div id="body_record_sendBox_generateMd_line1">
-                    <span>站号：<input id="generateMd_id" type="number" min="0" max="247"></span>
-                    <span>
-                        功能：<drop-down id="generateMd_fun"></drop-down>
-                        <script>
-                            generateMd_fun.options = mdFunName;
-                            generateMd_fun.render();
-                        </script>
-                    </span>
-                </div>
-            </div>
-            <div id="body_record_sendBox_left">
-                <textarea readonly></textarea>
-            </div>
-            <div id="body_record_sendBox_right">
-                <my-button onclick="onGenerateMdClick()">生成MD指令</my-button>
-                <my-button onclick="onSendMdClick()">发送</my-button>
-            </div>
+            <textarea readonly></textarea>
+            <my-button onclick="onSendMdClick()">发送</my-button>
         </div>
     </div>
 </div>
 <script>
-    function onGenerateMdClick() {
-        body_record_sendBox_generateMd.style.display = "block";
-    }
-
     function onSendMdClick() {
 
     }

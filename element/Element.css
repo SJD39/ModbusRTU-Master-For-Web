@@ -1,49 +1,33 @@
-.dropDownBox{
+.dropDownBox {
     display: inline-block;
     position: relative;
+    color: #fff;
+}
 
+.dropDownDialog{
+    top: 30px;
+    left: -12px;
     width: max-content;
+    background-color: transparent;
 }
 
-.dropDownViewBox{
-    transition: .3s;
-    padding: 4px;
-    border-radius: 6px;
-}
-
-.dropDownViewBox:hover{
-    background-color: #fff;
-    color: #39c5bb;
-}
-
-.dropDownUl{
-    position: absolute;
-    left: -10px;
-    width: max-content;
-
+.dropDownMenu{
     background-color: #39c5bb;
-    border-color: #fff;
-    border-width: 2px;
-    border-style: solid;
+    border: #fff 2px solid;
     border-radius: 9px;
     overflow: hidden;
 }
 
-.dropDownUl li{
-    padding: 12px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    transition: all 0.3s;
-    text-align: center;
-    border-bottom: #ffffff39 2px solid;
+.dropDownMenu li{
+    padding: 4px 12px 4px 12px;
+    transition: all 0.2s;
+    color: #fff;
 }
-
-.dropDownUl li:hover{
+.dropDownMenu li:hover{
     background-color: #fff;
     color: #39c5bb;
 }
-
-.dropDownUl li:last-child{
+.dropDownMenu li:last-child{
     border-bottom: none;
 }
 
