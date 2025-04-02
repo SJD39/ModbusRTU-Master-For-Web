@@ -34,7 +34,7 @@
     #body_record_ul {
         color: #fff;
         width: 100%;
-        height: calc(100% - 100px - 20px);
+        height: calc(100% - 300px - 20px);
 
         overflow-y: scroll;
     }
@@ -47,24 +47,29 @@
         background-color: #ffffff39;
     }
 
-    #body_record_generateMd {
-        border-radius: 9px;
-        background-color: #ffffff39;
-        color: #fff;
-        width: 100%;
-
-    }
-
-    #body_record_generateMd_nec {
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
-
     #body_record_sendBox {
         width: 100%;
         display: flex;
         justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    #body_record_generateMd {
+        padding: 10px;
+        background-color: #ffffff39;
+        border-radius: 9px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #body_record_generateMd > div {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    #body_record_generateMd input{
+        width: 50px;
     }
 
     #body_record_sendBox textarea {
@@ -80,55 +85,43 @@
         width: 120px;
         height: 60px;
     }
-
-    #body_record_generateMd_read {
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
 </style>
 
 <div class="body">
     <div id="body_content"></div>
     <div id="body_record">
         <ul id="body_record_ul"></ul>
-        <div id="body_record_generateMd">
-            <div id="body_record_generateMd_nec">
-                <span>站号：<input id="generateMd_id" type="number" min="0" max="247" /></span>
-                <span>
-                    功能：<drop-down id="generateMd_fun" style="width: 87.5px;"></drop-down>
-                    <script>
-                        const mdFunName = [
-                            "01 读线圈",
-                            "02 读离散",
-                            "03 读保持",
-                            "04 读输入",
-                            "05 写单线圈",
-                            "06 写单保持",
-                            "15 写多线圈",
-                            "16 写多保持"
-                        ];
-                        generateMd_fun.options = mdFunName;
-                        generateMd_fun.render();
-                    </script>
-                </span>
-            </div>
-            <div id="body_record_generateMd_read">
-                <span>起始地址：</span>
-                <span>数量：</span>
-            </div>
-            <div id="body_record_generateMd_writeSingle">
-                <span>地址：</span>
-                <span>值：</span>
-            </div>
-            <div id="body_record_generateMd_writeMulti">
-                <span>起始地址：</span>
-                <span>数量：</span>
-                <span>字节数：</span>
-                <span>值：</span>
-            </div>
-        </div>
         <div id="body_record_sendBox">
+            <div id="body_record_generateMd">
+                <div>
+                    <span>站号：<input id="generateMd_id" type="number" min="0" max="247" /></span>
+                    <span>
+                        功能：<drop-down id="generateMd_fun" style="width: 87.5px;"></drop-down>
+                        <script>
+                            const mdFunName = [
+                                "01 读线圈",
+                                "02 读离散",
+                                "03 读保持",
+                                "04 读输入",
+                                "05 写单线圈",
+                                "06 写单保持",
+                                "15 写多线圈",
+                                "16 写多保持"
+                            ];
+                            generateMd_fun.options = mdFunName;
+                            generateMd_fun.render();
+                        </script>
+                    </span>
+                </div>
+                <div>
+                    <span>起始地址：<input type="text"></span>
+                    <span>长度：<input type="text"></span>
+                </div>
+                <div>
+                    <span>字节数：<input type="text"></span>
+                    <span>值：<input type="text"></span>
+                </div>
+            </div>
             <textarea readonly></textarea>
             <my-button onclick="onSendMdClick()">发送</my-button>
         </div>

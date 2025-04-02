@@ -115,15 +115,14 @@ class ModBusRTUMaster {
                 continue;
             }
             // 读取站号
-            if (mdParseStep === 0 && this.mdBuffer.length < 2) {
+            if (mdParseStep === 0 && this.mdBuffer.length >= 2) {
                 mdParseResult["站号"] = this.mdBuffer.shift();
                 mdParseResult["功能码"] = this.mdBuffer.shift();
                 mdOriginal.push(mdParseResult["站号"], mdParseResult["功能码"]);
 
-                // if (0 < mdParseResult["站号"] < 248){
-                    
-
-                // }
+                if (0 < mdParseResult["站号"] < 248){
+                    throw new Error(`错误的站号：${mdParseResult["站号"].toString(16).padStart(2, '0')}`);
+                }
 
                 if (mdParseResult["功能码"] > 128) {
                     // 读错误码
