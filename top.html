@@ -28,6 +28,10 @@
         margin-left: 12px;
         margin-right: 12px;
     }
+    .top_ul my-button{
+        margin: 0 5px 0 5px;
+        padding: 5px 10px 5px 10px;
+    }
 </style>
 
 <div class="top">
@@ -41,14 +45,14 @@
             <li>数据位：<drop-down id="dataBitsDom" value="1" options='["7","8"]'></drop-down></li>
             <li>停止位：<drop-down id="stopBitsDom" value="0" options='["1","2"]'></drop-down></li>
             <li>奇偶校验：<drop-down id="parityDom" value="0" options='["none","even","odd"]'></drop-down></li>
-            <li><button class="buttonWhite" onclick="openSerial()">打开串口</button></li>
+            <li><my-button class="buttonWhite" onclick="openSerial()">打开串口</my-button></li>
             <li>刷新率：<drop-down id="refreshRate" value="1" options='["100","500","1000"]'></drop-down>ms</li>
         </ul>
         <ul class="top_ul">
-            <button onclick="saveToCookie()">保存至Cookie</button>
-            <button onclick="readFromCookie()">从Cookie读取</button>
-            <button>保存至文件</button>
-            <button>从文件读取</button>
+            <my-button onclick="saveToCookie()">保存至Cookie</my-button>
+            <my-button onclick="readFromCookie()">从Cookie读取</my-button>
+            <my-button>保存至文件</my-button>
+            <my-button>从文件读取</my-button>
         </ul>
     </div>
 </div>

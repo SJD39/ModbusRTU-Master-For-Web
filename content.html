@@ -50,40 +50,23 @@
     #body_record_sendBox {
         width: 100%;
         display: flex;
-        justify-content: space-between;
         flex-wrap: wrap;
+        color: #fff;
     }
 
-    #body_record_generateMd {
-        padding: 10px;
-        background-color: #ffffff39;
-        border-radius: 9px;
-        margin-bottom: 10px;
+    #body_record_sendBox > div {
         width: 100%;
-    }
-
-    #body_record_generateMd > div {
         display: flex;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    #body_record_generateMd input{
-        width: 50px;
+        margin-top: 10px;
     }
 
     #body_record_sendBox textarea {
         width: calc(100% - 120px - 10px);
-        height: 60px;
+        height: 90px;
         border-radius: 9px;
         background-color: #ffffff39;
         color: #fff;
         padding: 12px;
-    }
-
-    #body_record_sendBox my-button {
-        width: 120px;
-        height: 60px;
     }
 </style>
 
@@ -91,44 +74,56 @@
     <div id="body_content"></div>
     <div id="body_record">
         <ul id="body_record_ul"></ul>
-        <div id="body_record_sendBox">
-            <div id="body_record_generateMd">
-                <div>
-                    <span>站号：<input id="generateMd_id" type="number" min="0" max="247" /></span>
-                    <span>
-                        功能：<drop-down id="generateMd_fun" style="width: 87.5px;"></drop-down>
-                        <script>
-                            const mdFunName = [
-                                "01 读线圈",
-                                "02 读离散",
-                                "03 读保持",
-                                "04 读输入",
-                                "05 写单线圈",
-                                "06 写单保持",
-                                "15 写多线圈",
-                                "16 写多保持"
-                            ];
-                            generateMd_fun.options = mdFunName;
-                            generateMd_fun.render();
-                        </script>
-                    </span>
-                </div>
-                <div>
-                    <span>起始地址：<input type="text"></span>
-                    <span>长度：<input type="text"></span>
-                </div>
-                <div>
-                    <span>字节数：<input type="text"></span>
-                    <span>值：<input type="text"></span>
+        <div id="body_record_sendBox" style="width: 100%; display: flex; flex-wrap: wrap;">
+            <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;">
+                <span style="width: 50%; display: inline-block;">
+                    站号：
+                    <input class="myInput" style="width: 60px;" id="generateMd_id" type="number" min="0" max="247" />
+                </span>
+                <span>
+                    功能：
+                    <drop-down id="generateMd_fun" style="width: 87.5px;"></drop-down>
+                    <script>
+                        generateMd_fun.options = [
+                            "01 读线圈",
+                            "02 读离散",
+                            "03 读保持",
+                            "04 读输入",
+                            "05 写单线圈",
+                            "06 写单保持",
+                            "15 写多线圈",
+                            "16 写多保持"
+                        ];
+                        generateMd_fun.render();
+                    </script>
+                </span>
+            </div>
+            <div style="width: 100%; padding: 10px; background-color: #ffffff39; border-radius: 9px;">
+                <span style="display: inline-block; width: 50%;">
+                    地址：
+                    <input class="myInput" style="width: 60px;" type="number">
+                </span>
+                <span style="display: inline-block;">
+                    长度：
+                    <input class="myInput" style="width: 60px;" type="number">
+                </span>
+            </div>
+            <div style="justify-content: space-between;">
+                <textarea></textarea>
+                <div style="display: flex; flex-wrap: wrap; width: 120px; align-content: space-between;">
+                    <my-button style="width: 120px; height: 40px;" onclick="onGenerateMdClick()">生成</my-button>
+                    <my-button style="width: 120px; height: 40px;" onclick="onSendMdClick()">发送</my-button>
                 </div>
             </div>
-            <textarea readonly></textarea>
-            <my-button onclick="onSendMdClick()">发送</my-button>
         </div>
     </div>
 </div>
 <script>
     function onSendMdClick() {
+
+    }
+
+    function onGenerateMdClick() {
 
     }
 
