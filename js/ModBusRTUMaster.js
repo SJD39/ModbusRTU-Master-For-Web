@@ -217,6 +217,15 @@ class ModBusRTUMaster {
         this.timer = setTimeout(() => { throw new Error(`timeout`) }, 1000);
     }
 
+    // 生成md命令
+    generateMdCommand(id, funCode, addr, len, value) {
+        // 读线圈
+        if (funCode == 1){
+            let cmd = [id, funCode, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
+            return [...cmd, ...this.crc(cmd)];
+        }
+    }
+
     // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;

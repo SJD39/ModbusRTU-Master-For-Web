@@ -1,7 +1,7 @@
 class Dropdown extends HTMLElement {
     constructor() {
         super();
-        this.value = 0;
+        this.value;
         this.options = [];
     }
 
@@ -29,9 +29,9 @@ class Dropdown extends HTMLElement {
 
         this.options.forEach((option, index) => {
             let li = document.createElement('li');
-            li.innerText = option;
+            li.innerText = option.key;
             li.addEventListener('click', () => {
-                this.setValue(index);
+                this.setValue(option.value);
                 this.dropDownDialog.close();
             });
             this.dropDownMenu.append(li);
@@ -44,16 +44,24 @@ class Dropdown extends HTMLElement {
         this.dropDownDialog.append(this.dropDownMenu);
         this.append(this.dropDownView, this.dropDownDialog);
 
-        this.setValue(this.value);
+        this.setValue(this.options[0].value);
     }
 
-    setValue(id) {
-        this.value = id;
-        this.dropDownView.innerText = this.getOption();
+    setValue(value) {
+        this.options.forEach((option, index) => {
+            if (option.value == value) {
+                this.value = option.value;
+                this.dropDownView.innerText = option.key;
+            }
+        });
     }
 
     getOption() {
-        return this.options[this.value];
+        this.options.forEach((option, index) => {
+            if (option.value == this.value) {
+                return option.key;
+            }
+        });
     }
 }
 customElements.define("drop-down", Dropdown);
