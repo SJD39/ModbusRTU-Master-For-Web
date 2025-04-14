@@ -44,7 +44,11 @@ class Dropdown extends HTMLElement {
         this.dropDownDialog.append(this.dropDownMenu);
         this.append(this.dropDownView, this.dropDownDialog);
 
-        this.setValue(this.options[0].value);
+        if(this.hasAttribute("value")){
+            this.setValue(this.value);
+        }else{
+            this.setValue(this.options[0].value);
+        }
     }
 
     setValue(value) {

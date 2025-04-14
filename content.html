@@ -109,7 +109,7 @@
                 </span>
             </div>
             <div style="justify-content: space-between;">
-                <textarea></textarea>
+                <textarea id="cmdInputTextarea"></textarea>
                 <div style="display: flex; flex-wrap: wrap; width: 120px; align-content: space-between;">
                     <my-button style="width: 120px; height: 40px;" onclick="onGenerateMdClick()">生成</my-button>
                     <my-button style="width: 120px; height: 40px;" onclick="onSendMdClick()">发送</my-button>
@@ -126,15 +126,18 @@
     function onGenerateMdClick() {
         let id = Number(generateMd_id.value);
         let fun = generateMd_fun.value;
-        if (fun == 1){
+        let cmd;
+        if (fun === 1){
             // 读取线圈
             let addr = generateMd_addrInput.value;
             let len = generateMd_lenInput.value;
-            let cmd = master.generateMdCommand(id=id, funCode=fun, addr=addr, len=len);
-        }else if (fun == 2){
-
+            cmd = master.generateMdCommand(id=id, funCode=fun, addr=addr, len=len);
         }
-        return cmd;
+
+        for (let i = 0; i < cmd.length; i++) {
+            cmd[i] = cmd[i].toString(16).padStart(2, '0');
+        }
+        cmdInputTextarea.value = cmd.join(" ");
     }
 
     class ElementMgr {

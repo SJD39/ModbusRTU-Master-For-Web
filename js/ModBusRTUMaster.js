@@ -220,7 +220,7 @@ class ModBusRTUMaster {
     // 生成md命令
     generateMdCommand(id, funCode, addr, len, value) {
         // 读线圈
-        if (funCode == 1){
+        if (funCode === 1){
             let cmd = [id, funCode, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
             return [...cmd, ...this.crc(cmd)];
         }
