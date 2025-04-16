@@ -225,7 +225,7 @@ class ModBusRTUMaster {
             return [...cmd, ...this.crc(cmd)];
         }
     }
-
+    
     // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;

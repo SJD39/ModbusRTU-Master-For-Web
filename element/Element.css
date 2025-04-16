@@ -1,4 +1,4 @@
-.dropDownBox {
+drop-down {
     display: inline-block;
     position: relative;
     color: #fff;
@@ -8,30 +8,26 @@
     top: 30px;
     left: -12px;
     width: max-content;
-    background-color: transparent;
-}
-
-.dropDownMenu{
     background-color: #39c5bb;
     border: #fff 2px solid;
     border-radius: 9px;
     overflow: hidden;
 }
 
-.dropDownMenu li{
+.dropDownDialog li{
     padding: 4px 12px 4px 12px;
     transition: all 0.2s;
     color: #fff;
 }
-.dropDownMenu li:hover{
+.dropDownDialog li:hover{
     background-color: #fff;
     color: #39c5bb;
 }
-.dropDownMenu li:last-child{
+.dropDownDialog li:last-child{
     border-bottom: none;
 }
 
-.radioBox{
+single-choice{
     display: inline-block;
 }
 
@@ -76,7 +72,7 @@
     }
 }
 
-.popupTipBox {
+popup-tip {
     position: fixed;
     top: 60px;
     left: 50%;
@@ -90,7 +86,7 @@
     display: none;
 }
 
-.my_button {
+my-button {
     background-color: #ffffff39;
     color: #fff;
 
@@ -102,7 +98,7 @@
     transition: all 0.2s;
 }
 
-.my_button:hover {
+my-button:hover {
     background-color: #fff;
     color: #39c5bb;
 }
