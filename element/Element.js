@@ -66,11 +66,11 @@ class SingleChoice extends HTMLElement {
 
     setValue(value) {
         const option = this.options.find(option => option.value === value);
-        if(!option){
+        if (!option) {
             throw new Error(`没有找到对应的选项${typeof (value)} ${value}`);
         }
         this.value = value;
-        for(let i = 0; i < this.children.length; i++){
+        for (let i = 0; i < this.children.length; i++) {
             this.children[i].className = this.children[i].innerText === option.key ? 'radioLi radioLiSelected' : 'radioLi';
         }
     }
@@ -122,12 +122,41 @@ class MyButton extends HTMLElement {
 customElements.define("my-button", MyButton);
 
 // 16进制输入区
-class HexInputArea extends HTMLElement {
+class HexTextArea extends HTMLTextAreaElement {
     constructor() {
-        super();
+        self = super();
+        self.spellcheck = false;
     }
 
     connectedCallback() {
+        self.addEventListener('input', (e) => {
+            // 记录光标位置
+            let selectionStart = self.selectionStart;
 
+            // 输入时，自动过滤掉非16进制字符
+            self.value = self.value.replace(/[^0-9a-fA-F]/g, '');
+
+            // 处理空格
+            let result = '';
+            for (let i = 0; i < self.value.length; i++) {
+                result += self.value[i];
+                if (i % 2 === 1 && i !== self.value.length - 1) {
+                    result += ' ';
+                    if(selectionStart === result.length){
+                        selectionStart++;
+                    }
+                }
+            }
+            self.value = result;
+
+            // 设置光标位置
+            console.log(e);
+            if(e.inputType === 'deleteContentBackward'){
+                selectionStart--;
+            }
+            self.setSelectionRange(selectionStart, selectionStart);
+        });
     }
+
 }
+customElements.define("hex-textarea", HexTextArea, { extends: "textarea" });
