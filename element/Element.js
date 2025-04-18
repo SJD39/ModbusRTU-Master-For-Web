@@ -33,7 +33,7 @@ class Dropdown extends HTMLElement {
     setValue(value) {
         const option = this.options.find(option => option.value === value);
         if (!option) {
-            throw new Error(`没有找到对应的选项${typeof(value)} ${value}`);
+            throw new Error(`没有找到对应的选项${typeof (value)} ${value}`);
         }
         this.value = value;
         this.dropDownView.innerText = option.key;
@@ -44,49 +44,37 @@ customElements.define("drop-down", Dropdown);
 class SingleChoice extends HTMLElement {
     constructor() {
         super();
+        this.value = null;
+        this.options = [];
+        this.onValueChangeEvent = () => { };
     }
 
-    connectedCallback() {
-        this.clickCallback = function () { };
-        this.options = JSON.parse(this.getAttribute("options"));
-
-        this.liElements = [];
-        this.radioUl = document.createElement('ul');
-
-        this.radioUl.className = 'radioUl';
-
-        this.options.forEach((option, index) => {
+    render() {
+        this.options.forEach((option) => {
             let li = document.createElement('li');
             li.className = 'radioLi';
-            li.innerHTML = option;
-
+            li.innerText = option.key;
             li.addEventListener('click', () => {
-                this.setValue(index);
-                this.clickCallback();
+                this.setValue(option.value);
             });
-
-            this.liElements.push(li);
-            this.radioUl.append(li);
+            this.append(li);
         });
 
-        this.append(this.radioUl);
+        this.value = this.value === null ? this.options[0].value : this.value;
+        this.setValue(this.value);
+    }
 
-        // 初始化值
-        this.value = 0;
-        if (this.hasAttribute('value')) {
-            this.setValue(this.getAttribute("value"));
-        } else {
-            this.setValue(0);
+    setValue(value) {
+        const option = this.options.find(option => option.value === value);
+        if(!option){
+            throw new Error(`没有找到对应的选项${typeof (value)} ${value}`);
+        }
+        this.value = value;
+        for(let i = 0; i < this.children.length; i++){
+            this.children[i].className = this.children[i].innerText === option.key ? 'radioLi radioLiSelected' : 'radioLi';
         }
     }
-
-    setValue(id) {
-        this.liElements[this.value].className = 'radioLi';
-        this.liElements[id].className = 'radioLi radioLiSelected';
-        this.value = id;
-    }
 }
-
 customElements.define("single-choice", SingleChoice);
 
 class PopupTip extends HTMLElement {
@@ -140,6 +128,6 @@ class HexInputArea extends HTMLElement {
     }
 
     connectedCallback() {
-        
+
     }
 }

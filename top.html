@@ -38,7 +38,15 @@
 <div class="top">
     <div class="top_content">
         <ul class="top_ul">
-            <li><single-choice id="runMode" value="1" options='["运行","编辑"]'></single-choice></li>
+            <li><single-choice id="runMode"></single-choice></li>
+            <script>
+                runMode.options = [
+                    {key: "运行", value: 0},
+                    {key: "编辑", value: 1}
+                ];
+                runMode.value = 1;
+                runMode.render();
+            </script>
             <li>清空画面</li>
         </ul>
         <ul class="top_ul">

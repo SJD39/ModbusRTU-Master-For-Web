@@ -31,7 +31,7 @@ single-choice{
     display: inline-block;
 }
 
-.radioUl{
+single-choice{
     display: flex;
     justify-content: space-between;
 }
