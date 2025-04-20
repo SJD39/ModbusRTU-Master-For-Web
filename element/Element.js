@@ -130,33 +130,19 @@ class HexTextArea extends HTMLTextAreaElement {
 
     connectedCallback() {
         self.addEventListener('input', (e) => {
-            // 记录光标位置
-            let selectionStart = self.selectionStart;
-
             // 输入时，自动过滤掉非16进制字符
             self.value = self.value.replace(/[^0-9a-fA-F]/g, '');
 
-            // 处理空格
+            // 插入空格
             let result = '';
             for (let i = 0; i < self.value.length; i++) {
                 result += self.value[i];
                 if (i % 2 === 1 && i !== self.value.length - 1) {
                     result += ' ';
-                    if(selectionStart === result.length){
-                        selectionStart++;
-                    }
                 }
             }
             self.value = result;
-
-            // 设置光标位置
-            console.log(e);
-            if(e.inputType === 'deleteContentBackward'){
-                selectionStart--;
-            }
-            self.setSelectionRange(selectionStart, selectionStart);
         });
     }
-
 }
 customElements.define("hex-textarea", HexTextArea, { extends: "textarea" });
