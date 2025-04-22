@@ -12,8 +12,21 @@ class ModBusRTUMaster {
         this.mdOriginal = [];
         this.timer;
 
+        this.onWriteCallback = () => { };
         this.onReadCallback = () => { };
         this.onMdParseCallback = () => { };
+    }
+    async writeSerial(data) {
+        if(this.port === null || this.port.readable === null || this.port.writable === null){
+            throw new Error(`串口未打开`);
+        }
+
+        try {
+            await this.writer.write(data);
+            this.onWriteCallback(Date.now(), data);
+        } catch (error) {
+            throw new Error(`串口写入失败:${error}`);
+        }
     }
     // 启动主站
     async startMaster(options) {
@@ -48,7 +61,7 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        await this.writer.write(this.generateCommand(id, 1, addr, len));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 1, addr, len)));
         // 读返回值
         let result = await this.mdParse(id, 1, addr, len);
         return result["data"];
@@ -58,7 +71,7 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        await this.writer.write(this.generateCommand(id, 2, addr, len));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 2, addr, len)));
         // 读返回值
         let result = await this.mdParse(id, 2, addr, len);
         return result["data"];
@@ -68,7 +81,7 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        await this.writer.write(this.generateCommand(id, 3, addr, len));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 3, addr, len)));
         // 读返回值
         let result = await this.mdParse(id, 3, addr, len);
         return result["data"];
@@ -78,7 +91,7 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        await writer.write(this.generateCommand(id, 4, addr, len));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 4, addr, len)));
         // 读返回值
         let result = await this.mdParse(id, 4, addr, len);
         return result;
@@ -88,7 +101,7 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        this.writer.write(this.generateCommand(id, 5, addr, value ? 0xff : 0));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 5, addr, value ? 0xff : 0)));
         // 读返回值
         let result = await this.mdParse();
         return result["数据"];
@@ -98,13 +111,32 @@ class ModBusRTUMaster {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        this.writer.write(this.generateCommand(id, 6, addr, value));
+        await this.writeSerial(new Uint8Array(this.generateCommand(id, 6, addr, value)));
         // 读返回值
         let result = await this.mdParse();
         return;
     }
+    // 用户输入指令
+    async sendUserCommand(command) {
+        // 解析指令
+        // 站号
+        let slaveId = parseInt(command.slice(0, 2), 16);
+        this.checkId(slaveId);
+        // 功能码
+        let funCode = parseInt(command.slice(2, 4), 16);
+        this.checkFunCode(funCode);
+        if (funCode === 1) {
+            // 读线圈
+            let addr = parseInt(command.slice(4, 8), 16);
+            let len = parseInt(command.slice(8, 12), 16);
+            if (len > 2000) {
+                throw new Error(`线圈长度不能超过2000`);
+            }
+            let result = await this.readCoilsAsync(slaveId, addr, len);
+        }
+    }
     // MD解析
-    async mdParse(outId, outFunCode, outAddr, outDataLen) {
+    async mdParse() {
         let mdParseStep = 0;
         let mdOriginal = [];
         let mdParseResult = {};
@@ -120,9 +152,7 @@ class ModBusRTUMaster {
                 mdParseResult["功能码"] = this.mdBuffer.shift();
                 mdOriginal.push(mdParseResult["站号"], mdParseResult["功能码"]);
 
-                if (0 < mdParseResult["站号"] < 248){
-                    throw new Error(`错误的站号：${mdParseResult["站号"].toString(16).padStart(2, '0')}`);
-                }
+                this.checkId(mdParseResult["站号"]);
 
                 if (mdParseResult["功能码"] > 128) {
                     // 读错误码
@@ -204,7 +234,7 @@ class ModBusRTUMaster {
             result = [id, funCode, addr >> 8, addr & 0xFFFF, value >> 8, value & 0xFFFF];
         } else if ([15, 16].includes(funCode)) { }
 
-        return new Uint8Array([...result, ...this.crc(result)]);
+        return [...result, ...this.crc(result)];
     }
 
     // 变更状态为忙碌
@@ -214,22 +244,15 @@ class ModBusRTUMaster {
             await new Promise(resolve => setTimeout(resolve, 10));
         }
         this.taskRunning = true;
-        this.timer = setTimeout(() => { throw new Error(`timeout`) }, 1000);
-    }
-
-    // 生成md命令
-    generateMdCommand(id, funCode, addr, len, value) {
-        // 读线圈
-        if (funCode === 1){
-            let cmd = [id, funCode, addr >> 8, addr & 0xFFFF, len >> 8, len & 0xFFFF];
-            return [...cmd, ...this.crc(cmd)];
-        }
+        this.timer = setTimeout(() => {
+            this.taskRunning = false;
+            throw new Error(`timeout`);
+        }, 1000);
     }
     
     // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;
-
         for (let i = 0; i < data.length; i++) {
             crcValue = (crcValue & 0xFFFF) ^ data[i];
             for (let ii = 0; ii < 8; ii++) {
@@ -241,8 +264,20 @@ class ModBusRTUMaster {
                 }
             }
         }
-
         return [crcValue & 0xFF, crcValue >> 8];
+    }
+
+    // 校验站号
+    checkId(id) {
+        if (id < 1 || id > 247) {
+            throw new Error(`错误的站号：${id}`);
+        }
+    }
+    // 校验功能码
+    checkFunCode(funCode) {
+        if (![1, 2, 3, 4, 5, 6, 15, 16].includes(funCode)) {
+            throw new Error(`错误的功能码：${funCode}`);
+        }
     }
 
     // 数组对比
@@ -250,13 +285,11 @@ class ModBusRTUMaster {
         if (arr1.length !== arr2.length) {
             return false;
         }
-
         for (let i = 0; i < arr1.length; i++) {
             if (arr1[i] !== arr2[i]) {
                 return false;
             }
         }
-
         return true;
     }
 }

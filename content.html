@@ -34,7 +34,7 @@
     #body_record_ul {
         color: #fff;
         width: 100%;
-        height: calc(100% - 300px - 20px);
+        height: calc(100% - 220px - 20px);
 
         overflow-y: scroll;
     }
@@ -119,7 +119,17 @@
     </div>
 </div>
 <script>
-    function onSendMdClick() {
+    async function onSendMdClick() {
+        let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
+        try{
+            await master.sendUserCommand(cmd);
+        }catch(e){
+            console.log(e);
+            popupTip.innerText = e;
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return;
+        }
 
     }
 
@@ -131,7 +141,7 @@
             // 读取线圈
             let addr = generateMd_addrInput.value;
             let len = generateMd_lenInput.value;
-            cmd = master.generateMdCommand(id=id, funCode=fun, addr=addr, len=len);
+            cmd = master.generateCommand(id=id, funCode=fun, addr=addr, num=len);
         }
 
         for (let i = 0; i < cmd.length; i++) {
