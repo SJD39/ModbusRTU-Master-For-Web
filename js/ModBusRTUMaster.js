@@ -58,83 +58,38 @@ class ModBusRTUMaster {
     }
     // 01 读线圈
     async readCoilsAsync(id, addr, len) {
-        await this.busy();
-        // 写指令
-        this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 1, addr, len)));
-        // 读返回值
-        let result = await this.mdParse(id, 1, addr, len);
-        return result["data"];
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 1, addr, len)));
     }
     // 02 读离散
     async readDiscreteAsync(id, addr, len) {
-        await this.busy();
-        // 写指令
-        this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 2, addr, len)));
-        // 读返回值
-        let result = await this.mdParse(id, 2, addr, len);
-        return result["data"];
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 2, addr, len)));
     }
     // 03 读保持寄存器
     async readHoldingRegistersAsync(id, addr, len) {
-        await this.busy();
-        // 写指令
-        this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 3, addr, len)));
-        // 读返回值
-        let result = await this.mdParse(id, 3, addr, len);
-        return result["data"];
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 3, addr, len)));
     }
     // 04 读输入寄存器
     async ReadInputRegistersAsync(id, addr, len) {
-        await this.busy();
-        // 写指令
-        this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 4, addr, len)));
-        // 读返回值
-        let result = await this.mdParse(id, 4, addr, len);
-        return result;
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 4, addr, len)));
     }
     // 05 写单个线圈
     async writeSingleCoilAsync(id, addr, value) {
-        await this.busy();
-        // 写指令
-        this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 5, addr, value ? 0xff : 0)));
-        // 读返回值
-        let result = await this.mdParse();
-        return result["数据"];
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 5, addr, value ? 0xff : 0)));
     }
     // 06 写单个保持寄存器
     async WriteSingleRegister(id, addr, value) {
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 6, addr, value)));
+    }
+    async mdFunAchieve(data){
         await this.busy();
         // 写指令
         this.mdBuffer = [];
-        await this.writeSerial(new Uint8Array(this.generateCommand(id, 6, addr, value)));
+        await this.writeSerial(data);
         // 读返回值
         let result = await this.mdParse();
-        return;
+        return result;
     }
-    // 用户输入指令
-    async sendUserCommand(command) {
-        // 解析指令
-        // 站号
-        let slaveId = parseInt(command.slice(0, 2), 16);
-        this.checkId(slaveId);
-        // 功能码
-        let funCode = parseInt(command.slice(2, 4), 16);
-        this.checkFunCode(funCode);
-        if (funCode === 1) {
-            // 读线圈
-            let addr = parseInt(command.slice(4, 8), 16);
-            let len = parseInt(command.slice(8, 12), 16);
-            if (len > 2000) {
-                throw new Error(`线圈长度不能超过2000`);
-            }
-            let result = await this.readCoilsAsync(slaveId, addr, len);
-        }
-    }
+
     // MD解析
     async mdParse() {
         let mdParseStep = 0;
@@ -151,8 +106,6 @@ class ModBusRTUMaster {
                 mdParseResult["站号"] = this.mdBuffer.shift();
                 mdParseResult["功能码"] = this.mdBuffer.shift();
                 mdOriginal.push(mdParseResult["站号"], mdParseResult["功能码"]);
-
-                this.checkId(mdParseResult["站号"]);
 
                 if (mdParseResult["功能码"] > 128) {
                     // 读错误码
@@ -267,17 +220,13 @@ class ModBusRTUMaster {
         return [crcValue & 0xFF, crcValue >> 8];
     }
 
-    // 校验站号
-    checkId(id) {
-        if (id < 1 || id > 247) {
-            throw new Error(`错误的站号：${id}`);
+    // 十六进制字符串转十进制数组
+    hexStrToArray(str) {
+        let result = [];
+        for (let i = 0; i < str.length; i += 2) {
+            result.push(parseInt(str.substr(i, 2), 16));
         }
-    }
-    // 校验功能码
-    checkFunCode(funCode) {
-        if (![1, 2, 3, 4, 5, 6, 15, 16].includes(funCode)) {
-            throw new Error(`错误的功能码：${funCode}`);
-        }
+        return result;
     }
 
     // 数组对比

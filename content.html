@@ -41,6 +41,7 @@
 
     #body_record_ul li {
         padding: 12px;
+        border-radius: 9px;
     }
 
     #body_record_ul li:hover {
@@ -121,8 +122,9 @@
 <script>
     async function onSendMdClick() {
         let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
+
         try{
-            await master.sendUserCommand(cmd);
+            await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
         }catch(e){
             console.log(e);
             popupTip.innerText = e;
