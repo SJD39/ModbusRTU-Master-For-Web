@@ -50,50 +50,36 @@
             <li>清空画面</li>
         </ul>
         <ul class="top_ul">
-            <li>波特率：<drop-down id="baudRateDom"></drop-down></li>
-            <li>数据位：<drop-down id="dataBitsDom"></drop-down></li>
+            <li>波特率：<drop-down id="baudRateDom" value="115200"></drop-down></li>
+            <li>数据位：<drop-down id="dataBitsDom" value="8"></drop-down></li>
             <li>停止位：<drop-down id="stopBitsDom"></drop-down></li>
             <li>奇偶校验：<drop-down id="parityDom"></drop-down></li>
             <li><my-button class="buttonWhite" onclick="openSerial()">打开串口</my-button></li>
-            <li>刷新率：<drop-down id="refreshRate"></drop-down></li>
+            <li>刷新率：<drop-down id="refreshRate" value="500"></drop-down></li>
             <script>
-                baudRateDom.options = [
-                    {key: "9600", value: 9600},
-                    {key: "19200", value: 19200},
-                    {key: "115200", value: 115200}
-                ];
-                baudRateDom.value = 115200;
-                baudRateDom.render();
-
-                dataBitsDom.options = [
-                    {key: "7", value: 7},
-                    {key: "8", value: 8}
-                ];
-                dataBitsDom.value = 8;
-                dataBitsDom.render();
-
-                stopBitsDom.options = [
-                    {key: "1", value: 1},
-                    {key: "2", value: 2}
-                ];
-                stopBitsDom.value = 1;
-                stopBitsDom.render();
-
-                parityDom.options = [
+                baudRateDom.setOptions([
+                    {key: "9600", value: "9600"},
+                    {key: "19200", value: "19200"},
+                    {key: "115200", value: "115200"}
+                ]);
+                dataBitsDom.setOptions([
+                    {key: "7", value: "7"},
+                    {key: "8", value: "8"}
+                ]);
+                stopBitsDom.setOptions([
+                    {key: "1", value: "1"},
+                    {key: "2", value: "2"}
+                ]);
+                parityDom.setOptions([
                     {key: "none", value: "none"},
                     {key: "even", value: "even"},
                     {key: "odd", value: "odd"}
-                ];
-                parityDom.value = "none";
-                parityDom.render();
-
-                refreshRate.options = [
-                    {key: "100ms", value: 100},
-                    {key: "500ms", value: 500},
-                    {key: "1000ms", value: 1000}
-                ];
-                refreshRate.value = 100;
-                refreshRate.render();
+                ]);
+                refreshRate.setOptions([
+                    {key: "100ms", value: "100"},
+                    {key: "500ms", value: "500"},
+                    {key: "1000ms", value: "1000"}
+                ]);
             </script>
         </ul>
         <ul class="top_ul">

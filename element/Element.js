@@ -1,17 +1,24 @@
 class Dropdown extends HTMLElement {
     constructor() {
         super();
-        this.value = null;
-        this.options = [];
     }
-
-    render() {
+    connectedCallback() {
+        if (this.hasAttribute("value")) {
+            this.value = this.getAttribute("value");
+        }
         this.dropDownView = document.createElement('span');
         this.dropDownDialog = document.createElement('dialog');
         this.dropDownView.className = 'dropDownView';
         this.dropDownDialog.className = 'dropDownDialog';
 
-        this.options.forEach((option) => {
+        this.dropDownView.addEventListener('click', () => {
+            this.dropDownDialog.show();
+        });
+        this.append(this.dropDownView, this.dropDownDialog);
+    }
+    setOptions(options) {
+        this.dropDownDialog.innerHTML = '';
+        options.forEach((option) => {
             let li = document.createElement('li');
             li.innerText = option.key;
             li.addEventListener('click', () => {
@@ -20,23 +27,13 @@ class Dropdown extends HTMLElement {
             });
             this.dropDownDialog.append(li);
         });
-        this.dropDownView.addEventListener('click', () => {
-            this.dropDownDialog.show();
-        });
-
-        this.append(this.dropDownView, this.dropDownDialog);
-
-        this.value = this.value === null ? this.options[0].value : this.value;
-        this.setValue(this.value);
+        this.options = options;
+        this.setValue(this.value === undefined ? this.options[0].value : this.value);
     }
-
     setValue(value) {
         const option = this.options.find(option => option.value === value);
-        if (!option) {
-            throw new Error(`没有找到对应的选项${typeof (value)} ${value}`);
-        }
-        this.value = value;
         this.dropDownView.innerText = option.key;
+        this.value = value;
     }
 }
 customElements.define("drop-down", Dropdown);
