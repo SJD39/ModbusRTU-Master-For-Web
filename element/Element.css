@@ -5,8 +5,6 @@ drop-down {
 }
 
 .dropDownDialog{
-    /* top: 30px; */
-    /* bottom: 0; */
     left: -12px;
     width: max-content;
     background-color: #39c5bb;

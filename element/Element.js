@@ -6,10 +6,17 @@ class Dropdown extends HTMLElement {
         if (this.hasAttribute("value")) {
             this.value = this.getAttribute("value");
         }
+        this.menuDir = this.hasAttribute("menuDir") ? this.getAttribute("menuDir") : 'bottom';
         this.dropDownView = document.createElement('span');
         this.dropDownDialog = document.createElement('dialog');
         this.dropDownView.className = 'dropDownView';
         this.dropDownDialog.className = 'dropDownDialog';
+
+        if (this.menuDir === 'bottom') {
+            this.dropDownDialog.style.top = '30px';
+        }else if (this.menuDir === 'up') {
+            this.dropDownDialog.style.bottom = '30px';
+        }
 
         this.dropDownView.addEventListener('click', () => {
             this.dropDownDialog.show();
