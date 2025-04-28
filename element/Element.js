@@ -3,25 +3,34 @@ class Dropdown extends HTMLElement {
         super();
     }
     connectedCallback() {
+        // 创建元素
+        this.dropDownTag = document.createElement('span');
+        this.dropDownMenu = document.createElement('span');
+        this.dropDownMenuKey = document.createElement('span');
+        this.dropDownDialog = document.createElement('dialog');
+        this.dropDownDialog.className = 'dropDownDialog';
+        this.dropDownMenu.style.position = 'relative';
+        // 初始化tag
+        if (this.hasAttribute("tag")) {
+            this.dropDownTag.innerText = this.getAttribute("tag");
+        }
+        // 初始化值
         if (this.hasAttribute("value")) {
             this.value = this.getAttribute("value");
         }
-        this.menuDir = this.hasAttribute("menuDir") ? this.getAttribute("menuDir") : 'bottom';
-        this.dropDownView = document.createElement('span');
-        this.dropDownDialog = document.createElement('dialog');
-        this.dropDownView.className = 'dropDownView';
-        this.dropDownDialog.className = 'dropDownDialog';
-
-        if (this.menuDir === 'bottom') {
+        // 菜单方向
+        this.menuDir = this.hasAttribute("menuDir") ? this.getAttribute("menuDir") : 'down';
+        if (this.menuDir === 'down') {
             this.dropDownDialog.style.top = '30px';
-        }else if (this.menuDir === 'up') {
+        } else if (this.menuDir === 'up') {
             this.dropDownDialog.style.bottom = '30px';
         }
-
-        this.dropDownView.addEventListener('click', () => {
-            this.dropDownDialog.show();
-        });
-        this.append(this.dropDownView, this.dropDownDialog);
+        // 显示菜单
+        this.dropDownTag.addEventListener('click', () => this.notMenu());
+        this.dropDownMenuKey.addEventListener('click', () => this.notMenu());
+        // 组合元素
+        this.dropDownMenu.append(this.dropDownMenuKey, this.dropDownDialog);
+        this.append(this.dropDownTag, this.dropDownMenu);
     }
     setOptions(options) {
         this.dropDownDialog.innerHTML = '';
@@ -39,8 +48,16 @@ class Dropdown extends HTMLElement {
     }
     setValue(value) {
         const option = this.options.find(option => option.value === value);
-        this.dropDownView.innerText = option.key;
+        this.dropDownMenuKey.innerText = option.key;
         this.value = value;
+    }
+
+    notMenu() {
+        if(this.dropDownDialog.open){
+            this.dropDownDialog.close();
+        }else{
+            this.dropDownDialog.show();
+        }
     }
 }
 customElements.define("drop-down", Dropdown);
