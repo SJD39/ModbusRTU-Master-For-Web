@@ -16,7 +16,7 @@ class Dropdown extends HTMLElement {
         }
         // 初始化值
         if (this.hasAttribute("value")) {
-            this.value = this.getAttribute("value");
+            this.value = Number(this.getAttribute("value"));
         }
         // 菜单方向
         this.menuDir = this.hasAttribute("menuDir") ? this.getAttribute("menuDir") : 'down';
@@ -47,9 +47,9 @@ class Dropdown extends HTMLElement {
         this.setValue(this.value === undefined ? this.options[0].value : this.value);
     }
     setValue(value) {
-        const option = this.options.find(option => option.value === value);
+        const option = this.options.find(option => option.value == value);
         this.dropDownMenuKey.innerText = option.key;
-        this.value = value;
+        this.value = Number(value);
     }
 
     notMenu() {
