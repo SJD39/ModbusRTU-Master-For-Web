@@ -1,6 +1,8 @@
 class Dropdown extends HTMLElement {
     constructor() {
         super();
+
+        this.onValueChangeEvent = () => { };
     }
     connectedCallback() {
         // 创建元素
@@ -50,6 +52,7 @@ class Dropdown extends HTMLElement {
         const option = this.options.find(option => option.value === value);
         this.dropDownMenuKey.innerText = option.key;
         this.value = value;
+        this.onValueChangeEvent(value);
     }
 
     notMenu() {

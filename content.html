@@ -100,12 +100,27 @@
             <div style="width: 100%; padding: 10px; background-color: #ffffff39; border-radius: 9px;">
                 <span style="display: inline-block; width: 50%;">
                     地址：
-                    <input id="generateMd_addrInput" class="myInput" style="width: 60px;" type="number" value="0">
+                    <input id="generateMd_addrInput" class="myInput" style="width: 60px;" type="number" value="0"/>
                 </span>
-                <span style="display: inline-block;">
+                <span id="generateMd_lenSpan" style="display: inline-block;">
                     长度：
-                    <input id="generateMd_lenInput" class="myInput" style="width: 60px;" type="number" value="1">
+                    <input id="generateMd_lenInput" class="myInput" style="width: 60px;" type="number" value="1"/>
                 </span>
+                <span id="generateMd_valSpan" style="display: none;">
+                    数值：
+                    <input id="generateMd_valInput" class="myInput" style="width: 60px;" type="number" value="0"/>
+                </span>
+                <script>
+                    generateMd_fun.onValueChangeEvent = (value) => {
+                        if(value === 1 || value === 2 || value === 3 || value === 4){
+                            generateMd_lenSpan.style.display = "inline-block";
+                            generateMd_valSpan.style.display = "none";
+                        }else{
+                            generateMd_lenSpan.style.display = "none";
+                            generateMd_valSpan.style.display = "inline-block";
+                        }
+                    };
+                </script>
             </div>
             <div style="justify-content: space-between;">
                 <textarea is="hex-textarea" id="cmdInputTextarea"></textarea>
@@ -137,8 +152,7 @@
         let id = Number(generateMd_id.value);
         let fun = generateMd_fun.value;
         let cmd;
-        if (fun === 1){
-            // 读取线圈
+        if (fun === 1 || fun === 2 || fun === 3 || fun === 4){
             let addr = generateMd_addrInput.value;
             let len = generateMd_lenInput.value;
             cmd = master.generateCommand(id=id, funCode=fun, addr=addr, num=len);
