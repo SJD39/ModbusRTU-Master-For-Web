@@ -50,12 +50,12 @@
             <li>清空画面</li>
         </ul>
         <ul class="top_ul">
-            <li><drop-down id="baudRateDom" value="115200" tag="波特率："></drop-down></li>
-            <li><drop-down id="dataBitsDom" value="8" tag="数据位："></drop-down></li>
+            <li><drop-down id="baudRateDom" value="Number(115200)" tag="波特率："></drop-down></li>
+            <li><drop-down id="dataBitsDom" value="Number(8)" tag="数据位："></drop-down></li>
             <li><drop-down id="stopBitsDom" tag="停止位："></drop-down></li>
             <li><drop-down id="parityDom" tag="奇偶校验："></drop-down></li>
             <li><my-button class="buttonWhite" onclick="openSerial()">打开串口</my-button></li>
-            <li><drop-down id="refreshRate" value="500" tag="刷新率："></drop-down></li>
+            <li><drop-down id="refreshRate" value="Number(500)" tag="刷新率："></drop-down></li>
             <script>
                 baudRateDom.setOptions([
                     {key: "9600", value: 9600},

@@ -16,7 +16,7 @@ class Dropdown extends HTMLElement {
         }
         // 初始化值
         if (this.hasAttribute("value")) {
-            this.value = this.getAttribute("value");
+            this.value = eval(this.getAttribute("value"));
         }
         // 菜单方向
         this.menuDir = this.hasAttribute("menuDir") ? this.getAttribute("menuDir") : 'down';
