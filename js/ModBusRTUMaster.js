@@ -17,7 +17,7 @@ class ModBusRTUMaster {
         this.onMdParseCallback = () => { };
     }
     async writeSerial(data) {
-        if(this.port === null || this.port.readable === null || this.port.writable === null){
+        if (this.port === null || this.port.readable === null || this.port.writable === null) {
             throw new Error(`串口未打开`);
         }
 
@@ -80,7 +80,7 @@ class ModBusRTUMaster {
     async WriteSingleRegister(id, addr, value) {
         return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 6, addr, value)));
     }
-    async mdFunAchieve(data){
+    async mdFunAchieve(data) {
         await this.busy();
         // 写指令
         this.mdBuffer = [];
@@ -139,19 +139,11 @@ class ModBusRTUMaster {
             }
             // 根据长度读数据
             if (mdParseStep === 10) {
-                if ([1, 2].includes(mdParseResult["funCode"])) {
-                    if (this.mdBuffer.length < mdParseResult["byteCount"]) {
-                        continue;
-                    }
-                    mdParseResult["value"] = this.mdBuffer.splice(0, mdParseResult["byteCount"]);
-                } else if ([3, 4].includes(mdParseResult["funCode"])) {
-                    if (this.mdBuffer.length < (mdParseResult["byteCount"] * 2)) {
-                        continue;
-                    }
-                    mdParseResult["value"] = this.mdBuffer.splice(0, mdParseResult["byteCount"] * 2);
+                if (this.mdBuffer.length < mdParseResult["byteCount"]) {
+                    continue;
                 }
+                mdParseResult["value"] = this.mdBuffer.splice(0, mdParseResult["byteCount"]);
                 mdOriginal.push(...mdParseResult["value"]);
-
                 mdParseStep = 20;
             }
             // crc校验
@@ -159,6 +151,7 @@ class ModBusRTUMaster {
                 if (this.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
                     break;
                 } else {
+                    console.log(mdParseResult);
                     throw new Error("crc校验失败");
                 }
             }
