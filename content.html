@@ -152,10 +152,13 @@
         let id = Number(generateMd_id.value);
         let fun = generateMd_fun.value;
         let cmd;
+        let addr = generateMd_addrInput.value;
         if (fun === 1 || fun === 2 || fun === 3 || fun === 4){
-            let addr = generateMd_addrInput.value;
             let len = generateMd_lenInput.value;
             cmd = master.generateCommand(id=id, funCode=fun, addr=addr, num=len);
+        }else if(fun === 5 || fun === 6){
+            let val = generateMd_valInput.value;
+            cmd = master.generateCommand(id=id, funCode=fun, addr=addr, value=val);
         }
 
         for (let i = 0; i < cmd.length; i++) {
