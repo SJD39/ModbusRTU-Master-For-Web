@@ -143,6 +143,26 @@ class ModBusRTUMaster {
                     continue;
                 }
                 mdParseResult["value"] = this.mdBuffer.splice(0, mdParseResult["byteCount"]);
+
+                // 格式化数据
+                mdParseResult["formatValue"] = [];
+                if ([1, 2].includes(mdParseResult["funCode"])) {
+                    for (let i = 0; i < mdParseResult["value"].length; i++) {
+                        let mdValue = mdParseResult["value"][i].toString(2).padStart(8, '0');
+                        for (let j = 7; j >= 0; j--) {
+                            mdParseResult["formatValue"].push(mdValue[j] === '1' ? true : false);
+                        }
+                    }
+                } else if ([3, 4].includes(mdParseResult["funCode"])) {
+                    const buffer = new ArrayBuffer(16);
+                    const view = new DataView(buffer);
+                    for (let i = 0; i < mdParseResult["value"].length; i += 2) {
+                        view.setUint8(0, mdParseResult["value"][i]);
+                        view.setUint8(1, mdParseResult["value"][i + 1])
+                        mdParseResult["formatValue"].push(view.getUint16(0));
+                    }
+                }
+
                 mdOriginal.push(...mdParseResult["value"]);
                 mdParseStep = 20;
             }
@@ -165,13 +185,11 @@ class ModBusRTUMaster {
     // 生成MD指令
     generateCommand(id, funCode, addr, num, value, byteNum) {
         let result = [];
-
         if ([1, 2, 3, 4].includes(funCode)) {
-            result = [id, funCode, addr >> 8, addr & 0xFFFF, num >> 8, num & 0xFFFF];
+            result = [id, funCode, addr >> 8, addr & 0xFF, num >> 8, num & 0xFF];
         } else if ([5, 6].includes(funCode)) {
-            result = [id, funCode, addr >> 8, addr & 0xFFFF, value >> 8, value & 0xFFFF];
+            result = [id, funCode, addr >> 8, addr & 0xFF, value >> 8, value & 0xFF];
         }
-
         return [...result, ...this.crc(result)];
     }
     // 变更状态为忙碌
