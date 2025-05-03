@@ -161,11 +161,10 @@
     function loop() {
         timer = setTimeout(async () => {
             for (let i = 0; i < coilShows.length; i++) {
-                master.enqueueTask(async () => {
-                    coilShows[i].coilShowValue.innerText = (await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1))[0] ? 'True' : 'False';
+                await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1).then(data => {
+                    coilShows[i].coilShowValue.innerText = data.formatValue[0];
                 });
             }
-
             loop();
         }, refreshRate.value);
     };

@@ -102,17 +102,12 @@
         let coilCtrl = document.createElement('coil-ctrl');
         coilCtrl.station = station;
         coilCtrl.addr = addr;
-        coilCtrl.setCallBack = () => {
-            master.enqueueTask(async () => {
-                await master.writeSingleCoilAsync(station, addr, true);
-            });
-            console.log(master.taskQueue);
+        coilCtrl.setCallBack = async () => {
+            await master.writeSingleCoilAsync(station, addr, true);
         }
 
-        coilCtrl.resetCallBack = () => {
-            master.enqueueTask(async () => {
-                await master.writeSingleCoilAsync(station, addr, false);
-            });
+        coilCtrl.resetCallBack = async () => {
+            await master.writeSingleCoilAsync(station, addr, false);
         }
         coilCtrl.style.left = clickMenuBox.style.left;
         coilCtrl.style.top = clickMenuBox.style.top;

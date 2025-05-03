@@ -139,13 +139,11 @@
         try{
             await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
         }catch(e){
-            console.log(e);
             popupTip.innerText = e;
             popupTip.duration = 2000;
             popupTip.popup();
             return;
         }
-
     }
 
     function onGenerateMdClick() {

@@ -74,11 +74,11 @@ class ModBusRTUMaster {
     }
     // 05 写单个线圈
     async writeSingleCoilAsync(id, addr, value) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 5, addr, value ? 0xff : 0)));
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 5, addr, undefined, value ? 0xff00 : 0)));
     }
     // 06 写单个保持寄存器
     async WriteSingleRegister(id, addr, value) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 6, addr, value)));
+        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 6, addr, undefined, value)));
     }
     async mdFunAchieve(data) {
         await this.busy();

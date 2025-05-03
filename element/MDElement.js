@@ -42,13 +42,12 @@ class CoilCtrl extends MDElement {
         super();
         this.station;
         this.addr;
+        this.setCallBackFun = () => {};
+        this.resetCallBackFun = () => {};
     }
 
     connectedCallback() {
         super.connectedCallback();
-
-        this.setCallBackFun = function(){};
-        this.resetCallBackFun = function(){};
 
         this.className = 'coilCtrlBox';
         this.CoilCtrlSet = document.createElement('div');
