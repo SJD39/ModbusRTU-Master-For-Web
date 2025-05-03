@@ -90,44 +90,32 @@
     var master = new ModBusRTUMaster();
 
     master.onWriteCallback = function (timestamp, data) {
-        let dateStr = "";
-        dateStr = new Date(timestamp).toLocaleTimeString();
-
-        let dataStr = "";
+        let dataStr = "写：";
         for (let i = 0; i < data.length; i++) {
             dataStr += data[i].toString(16).padStart(2, '0') + " ";
         }
-
-        let li = document.createElement('li');
-        li.innerText = `${dateStr} 写：${dataStr}`;
-        body_record_ul.append(li);
+        addRecord(timestamp, dataStr);
     }
-
     master.onReadCallback = function (timestamp, data) {
-        let dateStr = "";
-        dateStr = new Date(timestamp).toLocaleTimeString();
-
-        let dataStr = "";
+        let dataStr = "读：";
         for (let i = 0; i < data.length; i++) {
             dataStr += data[i].toString(16).padStart(2, '0') + " ";
         }
-
-        let li = document.createElement('li');
-        li.innerText = `${dateStr} 读：${dataStr}`;
-        body_record_ul.append(li);
+        addRecord(timestamp, dataStr);
     }
-
     master.onMdParseCallback = function (timestamp, data) {
-        let dateStr = "";
-        dateStr = new Date(timestamp).toLocaleTimeString();
-
-        let dataStr = "";
+        let dataStr = "解：";
         for (key in data) {
             dataStr += `${key}:${data[key]} `;
         }
+        addRecord(timestamp, dataStr);
+    }
+    function addRecord(timestamp, dataStr){
+        let dateStr = "";
+        dateStr = new Date(timestamp).toLocaleTimeString();
 
         let li = document.createElement('li');
-        li.innerText = `${dateStr} 解：${dataStr} `;
+        li.innerText = `${dateStr} ${dataStr} `;
         body_record_ul.append(li);
     }
 

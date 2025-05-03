@@ -9,7 +9,6 @@
         display: flex;
         justify-content: space-between;
     }
-
     #body_content {
         width: calc(100% - 390px - 9px);
         height: 100%;
@@ -17,7 +16,6 @@
         background-color: #39c5bb;
         border-radius: 9px;
     }
-
     #body_record {
         width: 390px;
         height: 100%;
@@ -30,37 +28,44 @@
         flex-wrap: wrap;
         align-content: space-between;
     }
-
     #body_record_ul {
         color: #fff;
         width: 100%;
-        height: calc(100% - 220px - 20px);
-
+        height: calc(100% - 200px - 10px);
+        overflow-x: hidden;
         overflow-y: scroll;
     }
-
-    #body_record_ul li {
-        padding: 12px;
+    #body_record_ul::-webkit-scrollbar {
+        background-color: #39c5bb;
+        width: 9px;
+    }
+    #body_record_ul::-webkit-scrollbar-thumb{
+        background-color: #ffffff39;
         border-radius: 9px;
     }
-
+    #body_record_ul li {
+        width: calc(100% - 10px);
+        padding: 12px;
+        border-radius: 9px;
+        word-wrap: break-word;
+    }
     #body_record_ul li:hover {
         background-color: #ffffff39;
     }
-
     #body_record_sendBox {
         width: 100%;
         display: flex;
         flex-wrap: wrap;
         color: #fff;
     }
-
-    #body_record_sendBox > div {
+    #body_record_sendBox>div {
         width: 100%;
         display: flex;
         margin-top: 10px;
     }
-
+    #body_record_sendBox>div:first-child {
+        margin-top: 0px;
+    }
     #body_record_sendBox textarea {
         width: calc(100% - 120px - 10px);
         height: 90px;
@@ -79,20 +84,21 @@
             <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;">
                 <span style="width: 50%; display: inline-block;">
                     站号：
-                    <input class="myInput" style="width: 60px;" id="generateMd_id" type="number" min="0" max="247" value="1" />
+                    <input class="myInput" style="width: 60px;" id="generateMd_id" type="number" min="0" max="247"
+                        value="1" />
                 </span>
                 <span>
                     <drop-down id="generateMd_fun" menuDir="up" tag="功能："></drop-down>
                     <script>
                         generateMd_fun.setOptions([
-                            {key: "01 读线圈", value: 1},
-                            {key: "02 读离散", value: 2},
-                            {key: "03 读保持", value: 3},
-                            {key: "04 读输入", value: 4},
-                            {key: "05 写单线圈", value: 5},
-                            {key: "06 写单保持", value: 6},
-                            {key: "15 写多线圈", value: 15},
-                            {key: "16 写多保持", value: 16}
+                            { key: "01 读线圈", value: 1 },
+                            { key: "02 读离散", value: 2 },
+                            { key: "03 读保持", value: 3 },
+                            { key: "04 读输入", value: 4 },
+                            { key: "05 写单线圈", value: 5 },
+                            { key: "06 写单保持", value: 6 },
+                            { key: "15 写多线圈", value: 15 },
+                            { key: "16 写多保持", value: 16 }
                         ]);
                     </script>
                 </span>
@@ -100,22 +106,22 @@
             <div style="width: 100%; padding: 10px; background-color: #ffffff39; border-radius: 9px;">
                 <span style="display: inline-block; width: 50%;">
                     地址：
-                    <input id="generateMd_addrInput" class="myInput" style="width: 60px;" type="number" value="0"/>
+                    <input id="generateMd_addrInput" class="myInput" style="width: 60px;" type="number" value="0" />
                 </span>
                 <span id="generateMd_lenSpan" style="display: inline-block;">
                     长度：
-                    <input id="generateMd_lenInput" class="myInput" style="width: 60px;" type="number" value="1"/>
+                    <input id="generateMd_lenInput" class="myInput" style="width: 60px;" type="number" value="1" />
                 </span>
                 <span id="generateMd_valSpan" style="display: none;">
                     数值：
-                    <input id="generateMd_valInput" class="myInput" style="width: 60px;" type="number" value="0"/>
+                    <input id="generateMd_valInput" class="myInput" style="width: 60px;" type="number" value="0" />
                 </span>
                 <script>
                     generateMd_fun.onValueChangeEvent = (value) => {
-                        if(value === 1 || value === 2 || value === 3 || value === 4){
+                        if (value === 1 || value === 2 || value === 3 || value === 4) {
                             generateMd_lenSpan.style.display = "inline-block";
                             generateMd_valSpan.style.display = "none";
-                        }else if(value === 5 || value === 6){
+                        } else if (value === 5 || value === 6) {
                             generateMd_lenSpan.style.display = "none";
                             generateMd_valSpan.style.display = "inline-block";
                         }
@@ -135,10 +141,9 @@
 <script>
     async function onSendMdClick() {
         let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
-
-        try{
+        try {
             await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
-        }catch(e){
+        } catch (e) {
             popupTip.innerText = e;
             popupTip.duration = 2000;
             popupTip.popup();
@@ -151,10 +156,10 @@
         let fun = generateMd_fun.value;
         let cmd;
         let addr = generateMd_addrInput.value;
-        if (fun === 1 || fun === 2 || fun === 3 || fun === 4){
+        if (fun === 1 || fun === 2 || fun === 3 || fun === 4) {
             let len = generateMd_lenInput.value;
             cmd = master.generateCommand(id, fun, addr, len);
-        }else if(fun === 5 || fun === 6){
+        } else if (fun === 5 || fun === 6) {
             let val = generateMd_valInput.value;
             cmd = master.generateCommand(id, fun, addr, undefined, val);
         }

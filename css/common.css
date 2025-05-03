@@ -14,11 +14,6 @@
     outline: none;
 }
 
-/* 清除所有滚动条 */
-*::-webkit-scrollbar{
-    width: 0;
-}
-
 input::-webkit-inner-spin-button,
 input::-webkit-outer-spin-button {
     -webkit-appearance: none;
