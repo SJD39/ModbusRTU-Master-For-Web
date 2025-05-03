@@ -38,15 +38,10 @@
 <div class="top">
     <div class="top_content">
         <ul class="top_ul">
-            <li><single-choice id="runMode"></single-choice></li>
-            <script>
-                runMode.options = [
-                    {key: "运行", value: 0},
-                    {key: "编辑", value: 1}
-                ];
-                runMode.value = 1;
-                runMode.render();
-            </script>
+            <li>
+                <single-choice id="runMode" options='[{key: "运行", value: 0},{key: "编辑", value: 1}]'
+                    value="Number(1)"></single-choice>
+            </li>
             <li>清空画面</li>
         </ul>
         <ul class="top_ul">
@@ -58,27 +53,27 @@
             <li><drop-down id="refreshRate" value="Number(500)" tag="刷新率："></drop-down></li>
             <script>
                 baudRateDom.setOptions([
-                    {key: "9600", value: 9600},
-                    {key: "19200", value: 19200},
-                    {key: "115200", value: 115200}
+                    { key: "9600", value: 9600 },
+                    { key: "19200", value: 19200 },
+                    { key: "115200", value: 115200 }
                 ]);
                 dataBitsDom.setOptions([
-                    {key: "7", value: 7},
-                    {key: "8", value: 8}
+                    { key: "7", value: 7 },
+                    { key: "8", value: 8 }
                 ]);
                 stopBitsDom.setOptions([
-                    {key: "1", value: 1},
-                    {key: "2", value: 2}
+                    { key: "1", value: 1 },
+                    { key: "2", value: 2 }
                 ]);
                 parityDom.setOptions([
-                    {key: "none", value: "none"},
-                    {key: "even", value: "even"},
-                    {key: "odd", value: "odd"}
+                    { key: "none", value: "none" },
+                    { key: "even", value: "even" },
+                    { key: "odd", value: "odd" }
                 ]);
                 refreshRate.setOptions([
-                    {key: "100ms", value: 100},
-                    {key: "500ms", value: 500},
-                    {key: "1000ms", value: 1000}
+                    { key: "100ms", value: 100 },
+                    { key: "500ms", value: 500 },
+                    { key: "1000ms", value: 1000 }
                 ]);
             </script>
         </ul>
@@ -175,15 +170,15 @@
         }, refreshRate.value);
     };
 
-    runMode.clickCallback = function () {
+    runMode.onValueChangeEvent = function (value) {
         coilShows = document.getElementsByClassName('coilShowBox');
         textShows = document.getElementsByClassName('textShow');
         coilCtrls = document.getElementsByClassName('coilCtrlBox');
-        if (runMode.value === 0) {
+        if (value === 0) {
             clickMenuBox.style.display = 'none';
             elementMgr.toShowMode();
             loop();
-        } else if (runMode.value === 1) {
+        } else if (value === 1) {
             elementMgr.toEditMode();
             clearInterval(timer);
         }

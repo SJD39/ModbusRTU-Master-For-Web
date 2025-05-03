@@ -68,35 +68,28 @@ customElements.define("drop-down", Dropdown);
 class SingleChoice extends HTMLElement {
     constructor() {
         super();
-        this.value = null;
-        this.options = [];
         this.onValueChangeEvent = () => { };
     }
-
-    render() {
-        this.options.forEach((option) => {
+    connectedCallback() {
+        this.options = eval(this.getAttribute("options"));
+        for(let i = 0; i < this.options.length; i++){
             let li = document.createElement('li');
             li.className = 'radioLi';
-            li.innerText = option.key;
+            li.innerText = this.options[i].key;
             li.addEventListener('click', () => {
-                this.setValue(option.value);
+                this.setValue(this.options[i].value);
             });
             this.append(li);
-        });
-
-        this.value = this.value === null ? this.options[0].value : this.value;
-        this.setValue(this.value);
+        }
+        this.setValue(eval(this.getAttribute("value")));
     }
-
     setValue(value) {
         const option = this.options.find(option => option.value === value);
-        if (!option) {
-            throw new Error(`没有找到对应的选项${typeof (value)} ${value}`);
-        }
-        this.value = value;
         for (let i = 0; i < this.children.length; i++) {
             this.children[i].className = this.children[i].innerText === option.key ? 'radioLi radioLiSelected' : 'radioLi';
         }
+        this.value = value;
+        this.onValueChangeEvent(value);
     }
 }
 customElements.define("single-choice", SingleChoice);
