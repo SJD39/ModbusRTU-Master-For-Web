@@ -3,7 +3,7 @@
         <li id="addCoilCtrlLi">添加线圈</li>
         <li>添加离散量</li>
         <li>添加输入寄存器</li>
-        <li>添加保持寄存器</li>
+        <li id="addRegCtrlLi">添加保持寄存器</li>
     </ul>
 </div>
 
@@ -39,6 +39,25 @@
             await master.writeSingleCoilAsync(id, addr, value);
         };
         body_content.append(coilCtrl);
+    });
+
+    // 添加保持寄存器输入
+    addRegCtrlLi.addEventListener('click', function () {
+        let info = addMdAction();
+        if (info === null) {
+            return;
+        }
+
+        let regCtrl = document.createElement('reg-ctrl');
+        regCtrl.tag = info.tag;
+        regCtrl.station = info.station;
+        regCtrl.addr = info.addr;
+        regCtrl.style.left = clickMenuBox.style.left;
+        regCtrl.style.top = clickMenuBox.style.top;
+        regCtrl.setCoilFun = async function (id, addr, value) {
+            
+        };
+        body_content.append(regCtrl);
     });
 
     // 添加MD操作

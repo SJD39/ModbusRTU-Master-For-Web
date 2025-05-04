@@ -13,8 +13,7 @@ class MDElement extends HTMLElement {
         this.Info.style.display = 'flex';
         this.Info.style.justifyContent = 'space-between';
 
-        this.InfoType = document.createElement('span');
-        this.InfoType.innerText = this.valueType;
+        this.InfoType = document.createElement('drop-down');
 
         this.InfoStation = document.createElement('span');
         this.InfoStation.style.paddingLeft = '6px';
@@ -68,7 +67,7 @@ class CoilCtrl extends MDElement {
         this.CoilCtrlValue = document.createElement('span');
         this.CoilCtrlValue.innerText = `值：${this.value}`;
         this.CoilCtrlValue.addEventListener('click', async () => {
-            if(this.runMode === 0){
+            if (this.runMode === 0) {
                 return;
             }
             await this.setCoilFun(this.station, this.addr, !this.value);
@@ -76,6 +75,9 @@ class CoilCtrl extends MDElement {
 
         this.Info.append(this.InfoType, this.InfoStation, this.InfoAddr);
         this.append(this.tagBox, this.CoilCtrlValue, this.Info, this.delBox);
+        this.InfoType.dropDownMenuKey.style.color = '#39c5bb';
+        this.InfoType.setOptions([{ key: 'BOOL', value: 'BOOL' }]);
+        this.InfoType.setValue(this.valueType);
     }
     setValue(value) {
         this.value = value;
@@ -83,3 +85,40 @@ class CoilCtrl extends MDElement {
     }
 }
 customElements.define("coil-ctrl", CoilCtrl);
+
+class RegCtrl extends MDElement {
+    constructor() {
+        super();
+        this.value = 0;
+        this.valueType = 'UINT16';
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this.className = 'regCtrlBox';
+        this.RegCtrlValue = document.createElement('span');
+        this.RegCtrlValue.innerText = `值：${this.value}`;
+        this.RegCtrlValue.addEventListener('click', async () => {
+            if (this.runMode === 0) {
+                return;
+            }
+            await this.setRegFun(this.station, this.addr, this.value);
+        });
+
+        this.Info.append(this.InfoType, this.InfoStation, this.InfoAddr);
+        this.append(this.tagBox, this.RegCtrlValue, this.Info, this.delBox);
+        this.InfoType.dropDownMenuKey.style.color = '#39c5bb';
+        this.InfoType.setOptions([
+            { key: 'INT16', value: 'INT16' },
+            { key: 'UINT16', value: 'UINT16' },
+            { key: 'INT32', value: 'INT32' },
+            { key: 'UINT32', value: 'UINT32' },
+            { key: 'Float', value: 'Float' }
+        ]);
+        this.InfoType.setValue(this.valueType);
+    }
+    setValue(value) {
+        this.value = value;
+        this.RegCtrlValue.innerText = `值：${this.value}`;
+    }
+}
+customElements.define("reg-ctrl", RegCtrl);

@@ -1,4 +1,5 @@
-.coilCtrlBox {
+.coilCtrlBox,
+.regCtrlBox {
     display: flex;
     flex-direction: column;
 
@@ -11,6 +12,7 @@
     color: #39c5bb;
 }
 
-.coilCtrlBox > * {
+.coilCtrlBox>*,
+.regCtrlBox>* {
     padding: 3px;
 }
