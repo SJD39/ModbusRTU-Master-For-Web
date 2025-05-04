@@ -1,48 +1,16 @@
-.coilCtrlBox{
+.coilCtrlBox {
     display: flex;
+    flex-direction: column;
+
     position: fixed;
     z-index: 1000;
-    
+
     padding: 6px;
     background-color: #ffffff;
     border-radius: 6px;
     color: #39c5bb;
 }
 
-.coilCtrlBox *{
-    padding: 6px;
-}
-
-/*  */
-
-.coilShowBox{
-    display: flex;
-    position: fixed;
-    z-index: 1000;
-    
-    padding: 6px;
-    background-color: #ffffff;
-    border-radius: 6px;
-    color: #39c5bb;
-}
-
-.coilShowBox *{
-    padding: 6px;
-}
-
-/*  */
-
-.textShow{
-    display: flex;
-    position: fixed;
-    z-index: 1000;
-    
-    padding: 6px;
-    background-color: #ffffff;
-    border-radius: 6px;
-    color: #39c5bb;
-}
-
-.textShow *{
-    padding: 6px;
+.coilCtrlBox > * {
+    padding: 3px;
 }

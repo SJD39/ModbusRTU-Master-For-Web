@@ -1,12 +1,9 @@
 <div id="clickMenuBox" style="display: none;">
     <ul>
-
-        <li id="addStaticTextLi">添加静态文本</li>
-        <li id="addCoilShowLi">添加线圈显示</li>
-        <li id="addCoilInputLi">添加线圈输入</li>
-        <li>添加输入寄存器显示</li>
-        <li>添加保持寄存器显示</li>
-        <li>添加寄存器输入</li>
+        <li id="addCoilCtrlLi">添加线圈</li>
+        <li>添加离散量</li>
+        <li>添加输入寄存器</li>
+        <li>添加保持寄存器</li>
     </ul>
 </div>
 
@@ -25,97 +22,54 @@
         }
     });
 
-    // 添加线圈显示
-    addCoilShowLi.addEventListener("click", function () {
-        clickMenuBox.style.display = 'none';
-
-        let station = window.prompt("请输入站号", "1");
-        if (station === null || station === "" || isNaN(Number(station))) {
-            popupTip.innerText = "请正确输入站号";
-            popupTip.duration = 2000;
-            popupTip.popup();
-            return;
-        } else {
-            station = Number(station);
-        }
-        let addr = window.prompt("请输入地址", "0");
-        if (addr === null || addr === "" || isNaN(Number(addr))) {
-            popupTip.innerText = "请正确输入地址";
-            popupTip.duration = 2000;
-            popupTip.popup();
-            return;
-        } else {
-            addr = Number(addr);
-        }
-
-        let coilShow = document.createElement('coil-show');
-        coilShow.station = station;
-        coilShow.addr = addr;
-        coilShow.style.left = clickMenuBox.style.left;
-        coilShow.style.top = clickMenuBox.style.top;
-
-        body_content.append(coilShow);
-    });
-
-    // 添加静态文字
-    addStaticTextLi.addEventListener('click', function () {
-        clickMenuBox.style.display = 'none';
-
-        let text = window.prompt("请输入文本", "Text");
-        if (text === null || text === "") {
-            popupTip.innerText = "文本不能为空！";
-            popupTip.duration = 2000;
-            popupTip.popup();
-            return;
-        }
-
-        let textShow = document.createElement('text-show');
-        textShow.style.left = clickMenuBox.style.left;
-        textShow.style.top = clickMenuBox.style.top;
-        textShow.text = text;
-        body_content.append(textShow);
-    });
-
     // 添加线圈输入
-    addCoilInputLi.addEventListener('click', function () {
-        clickMenuBox.style.display = 'none';
-
-        let station = window.prompt("请输入站号", "1");
-        if (station === null || station === "" || isNaN(Number(station))) {
-            popupTip.innerText = "请正确输入站号";
-            popupTip.duration = 2000;
-            popupTip.popup();
+    addCoilCtrlLi.addEventListener('click', function () {
+        let info = addMdAction();
+        if (info === null) {
             return;
-        } else {
-            station = Number(station);
-        }
-        let addr = window.prompt("请输入地址", "0");
-        if (addr === null || addr === "" || isNaN(Number(addr))) {
-            popupTip.innerText = "请正确输入地址";
-            popupTip.duration = 2000;
-            popupTip.popup();
-            return;
-        } else {
-            addr = Number(addr);
         }
 
         let coilCtrl = document.createElement('coil-ctrl');
-        coilCtrl.station = station;
-        coilCtrl.addr = addr;
-        coilCtrl.setCallBack = async () => {
-            await master.writeSingleCoilAsync(station, addr, true);
-        }
-
-        coilCtrl.resetCallBack = async () => {
-            await master.writeSingleCoilAsync(station, addr, false);
-        }
+        coilCtrl.tag = info.tag;
+        coilCtrl.station = info.station;
+        coilCtrl.addr = info.addr;
         coilCtrl.style.left = clickMenuBox.style.left;
         coilCtrl.style.top = clickMenuBox.style.top;
-
+        coilCtrl.setCoilFun = async function (id, addr, value) {
+            await master.writeSingleCoilAsync(id, addr, value);
+        };
         body_content.append(coilCtrl);
     });
 
+    // 添加MD操作
+    function addMdAction() {
+        clickMenuBox.style.display = 'none';
 
+        let station = window.prompt("请输入站号", "1");
+        if (!isValidNumber(station)) {
+            popupTip.innerText = "请正确输入站号";
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return null;
+        }
+        station = Number(station);
+
+        let addr = window.prompt("请输入地址", "0");
+        if (!isValidNumber(addr)) {
+            popupTip.innerText = "请正确输入地址";
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return null;
+        }
+        addr = Number(addr);
+
+        let tag = window.prompt("请输入标签", "");
+        if (tag === null) {
+            return null;
+        }
+
+        return { "station": station, "addr": addr, "tag": tag };
+    }
 </script>
 
 <style>

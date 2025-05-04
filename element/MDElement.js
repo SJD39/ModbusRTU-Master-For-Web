@@ -3,12 +3,16 @@ class MDElement extends HTMLElement {
         super();
         this.runMode = 0;
     }
-
     connectedCallback() {
         this.draggable = true;
-        this.delBox = document.createElement('div');
+
+        this.tagBox = document.createElement('span');
+        this.tagBox.innerText = this.tag;
+
+        this.delBox = document.createElement('span');
         this.delBox.innerText = '删除';
         this.delBox.style.color = 'red';
+        this.delBox.style.textAlign = 'center';
         this.delBox.addEventListener('click', () => {
             this.remove();
         });
@@ -23,13 +27,11 @@ class MDElement extends HTMLElement {
             });
         });
     }
-
     toShowMode() {
         this.delBox.style.display = 'none';
         this.runMode = 1;
         this.draggable = false;
     }
-
     toEditMode() {
         this.delBox.style.display = 'block';
         this.runMode = 0;
@@ -42,84 +44,43 @@ class CoilCtrl extends MDElement {
         super();
         this.station;
         this.addr;
-        this.setCallBackFun = () => {};
-        this.resetCallBackFun = () => {};
+        this.value = false;
+        this.setCoilFun = async () => { };
     }
-
     connectedCallback() {
         super.connectedCallback();
 
         this.className = 'coilCtrlBox';
-        this.CoilCtrlSet = document.createElement('div');
-        this.CoilCtrlSet.innerText = '设1';
-        this.CoilCtrlSet.addEventListener('click', this.setCallBack);
 
-        this.CoilCtrlReset = document.createElement('div');
-        this.CoilCtrlReset.innerText = '设0';
-        this.CoilCtrlReset.addEventListener('click', this.resetCallBack);
+        this.CoilCtrlValue = document.createElement('span');
+        this.CoilCtrlValue.innerText = `值：${this.value}`;
+        this.CoilCtrlValue.addEventListener('click', async () => {
+            if(this.runMode === 0){
+                return;
+            }
+            await this.setCoilFun(this.station, this.addr, !this.value);
+        });
 
         this.CoilCtrlInfo = document.createElement('div');
-        this.CoilCtrlInfo.innerText = `05,${this.station},${this.addr}`;
+        this.CoilCtrlInfo.style.display = 'flex';
+        this.CoilCtrlInfo.style.justifyContent = 'space-between';
+        this.CoilCtrlInfoType = document.createElement('span');
+        this.CoilCtrlInfoType.innerText = 'BOOL';
 
-        this.append(this.CoilCtrlSet, this.CoilCtrlReset, this.CoilCtrlInfo, this.delBox);
+        this.CoilCtrlInfoStation = document.createElement('span');
+        this.CoilCtrlInfoStation.style.paddingLeft = '6px';
+        this.CoilCtrlInfoStation.innerText = this.station;
+
+        this.CoilCtrlInfoAddr = document.createElement('span');
+        this.CoilCtrlInfoAddr.style.paddingLeft = '6px';
+        this.CoilCtrlInfoAddr.innerText = this.addr;
+
+        this.CoilCtrlInfo.append(this.CoilCtrlInfoType, this.CoilCtrlInfoStation, this.CoilCtrlInfoAddr);
+        this.append(this.tagBox, this.CoilCtrlValue, this.CoilCtrlInfo, this.delBox);
     }
-
-    setCallBack(){
-        if(this.runMode != 1){
-            return;
-        }
-        this.setCallBackFun(this.station, this.addr);
-    }
-
-    resetCallBack(){
-        if(this.runMode != 1){
-            return;
-        }
-        this.resetCallBackFun(this.station, this.addr);
+    setValue(value) {
+        this.value = value;
+        this.CoilCtrlValue.innerText = `值：${this.value}`;
     }
 }
-
 customElements.define("coil-ctrl", CoilCtrl);
-
-class CoilShow extends MDElement {
-    constructor() {
-        super();
-        this.station;
-        this.addr;
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.className = 'coilShowBox';
-
-        this.coilShowValue = document.createElement('div');
-        this.coilShowValue.innerText = 'False';
-
-        this.coilShowInfo = document.createElement('div');
-        this.coilShowInfo.innerText = `01,${this.station},${this.addr}`;
-
-        this.append(this.coilShowValue, this.coilShowInfo, this.delBox);
-    }
-}
-
-customElements.define("coil-show", CoilShow);
-
-class TextShow extends MDElement {
-    constructor() {
-        super();
-
-        this.text = '默认文字';
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-
-        this.className = 'textShow';
-        this.TextShowValue = document.createElement('div');
-        this.TextShowValue.innerText = this.text;
-
-        this.append(this.TextShowValue, this.delBox);
-    }
-}
-
-customElements.define("text-show", TextShow);

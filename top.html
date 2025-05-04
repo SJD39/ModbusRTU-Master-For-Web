@@ -110,12 +110,15 @@
         }
         addRecord(timestamp, dataStr);
     }
-    function addRecord(timestamp, dataStr){
+    function addRecord(timestamp, dataStr) {
         let dateStr = "";
         dateStr = new Date(timestamp).toLocaleTimeString();
 
         let li = document.createElement('li');
         li.innerText = `${dateStr} ${dataStr} `;
+        if (body_record_ul.childElementCount > 20) {
+            body_record_ul.removeChild(body_record_ul.firstElementChild);
+        }
         body_record_ul.append(li);
     }
 
@@ -148,9 +151,9 @@
     var timer;
     function loop() {
         timer = setTimeout(async () => {
-            for (let i = 0; i < coilShows.length; i++) {
-                await master.readCoilsAsync(coilShows[i].station, coilShows[i].addr, 1).then(data => {
-                    coilShows[i].coilShowValue.innerText = data.formatValue[0];
+            for (let i = 0; i < coilCtrls.length; i++) {
+                await master.readCoilsAsync(coilCtrls[i].station, coilCtrls[i].addr, 1).then(data => {
+                    coilCtrls[i].setValue(data.formatValue[0]);
                 });
             }
             loop();
@@ -158,8 +161,6 @@
     };
 
     runMode.onValueChangeEvent = function (value) {
-        coilShows = document.getElementsByClassName('coilShowBox');
-        textShows = document.getElementsByClassName('textShow');
         coilCtrls = document.getElementsByClassName('coilCtrlBox');
         if (value === 0) {
             clickMenuBox.style.display = 'none';
