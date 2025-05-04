@@ -9,6 +9,21 @@ class MDElement extends HTMLElement {
         this.tagBox = document.createElement('span');
         this.tagBox.innerText = this.tag;
 
+        this.Info = document.createElement('div');
+        this.Info.style.display = 'flex';
+        this.Info.style.justifyContent = 'space-between';
+
+        this.InfoType = document.createElement('span');
+        this.InfoType.innerText = this.valueType;
+
+        this.InfoStation = document.createElement('span');
+        this.InfoStation.style.paddingLeft = '6px';
+        this.InfoStation.innerText = this.station;
+
+        this.InfoAddr = document.createElement('span');
+        this.InfoAddr.style.paddingLeft = '6px';
+        this.InfoAddr.innerText = this.addr;
+
         this.delBox = document.createElement('span');
         this.delBox.innerText = '删除';
         this.delBox.style.color = 'red';
@@ -42,10 +57,8 @@ class MDElement extends HTMLElement {
 class CoilCtrl extends MDElement {
     constructor() {
         super();
-        this.station;
-        this.addr;
         this.value = false;
-        this.setCoilFun = async () => { };
+        this.valueType = 'BOOL';
     }
     connectedCallback() {
         super.connectedCallback();
@@ -61,22 +74,8 @@ class CoilCtrl extends MDElement {
             await this.setCoilFun(this.station, this.addr, !this.value);
         });
 
-        this.CoilCtrlInfo = document.createElement('div');
-        this.CoilCtrlInfo.style.display = 'flex';
-        this.CoilCtrlInfo.style.justifyContent = 'space-between';
-        this.CoilCtrlInfoType = document.createElement('span');
-        this.CoilCtrlInfoType.innerText = 'BOOL';
-
-        this.CoilCtrlInfoStation = document.createElement('span');
-        this.CoilCtrlInfoStation.style.paddingLeft = '6px';
-        this.CoilCtrlInfoStation.innerText = this.station;
-
-        this.CoilCtrlInfoAddr = document.createElement('span');
-        this.CoilCtrlInfoAddr.style.paddingLeft = '6px';
-        this.CoilCtrlInfoAddr.innerText = this.addr;
-
-        this.CoilCtrlInfo.append(this.CoilCtrlInfoType, this.CoilCtrlInfoStation, this.CoilCtrlInfoAddr);
-        this.append(this.tagBox, this.CoilCtrlValue, this.CoilCtrlInfo, this.delBox);
+        this.Info.append(this.InfoType, this.InfoStation, this.InfoAddr);
+        this.append(this.tagBox, this.CoilCtrlValue, this.Info, this.delBox);
     }
     setValue(value) {
         this.value = value;

@@ -156,7 +156,9 @@
                     coilCtrls[i].setValue(data.formatValue[0]);
                 });
             }
-            loop();
+            if (runMode.value === 0) {
+                loop();
+            }
         }, refreshRate.value);
     };
 
@@ -168,7 +170,6 @@
             loop();
         } else if (value === 1) {
             elementMgr.toEditMode();
-            clearInterval(timer);
         }
     }
 
