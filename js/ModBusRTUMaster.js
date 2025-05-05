@@ -5,7 +5,7 @@ class ModBusRTUMaster {
         this.reader;
         this.writer;
 
-        this.funCodes = [1, 2, 3, 4, 5, 6];
+        this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
 
         // md解析
         this.mdBuffer = [];
@@ -57,28 +57,44 @@ class ModBusRTUMaster {
         }
     }
     // 01 读线圈
-    async readCoilsAsync(id, addr, len) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 1, addr, len)));
+    async readCoils(id, addr, len) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 1, "addr": addr, "num": len })));
     }
     // 02 读离散
-    async readDiscreteAsync(id, addr, len) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 2, addr, len)));
+    async readDiscrete(id, addr, len) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 2, "addr": addr, "num": len })));
     }
     // 03 读保持寄存器
-    async readHoldingRegistersAsync(id, addr, len) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 3, addr, len)));
+    async readHoldingRegisters(id, addr, len) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 3, "addr": addr, "num": len })));
     }
     // 04 读输入寄存器
-    async ReadInputRegistersAsync(id, addr, len) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 4, addr, len)));
+    async ReadInputRegisters(id, addr, len) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 4, "addr": addr, "num": len })));
     }
     // 05 写单个线圈
-    async writeSingleCoilAsync(id, addr, value) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 5, addr, undefined, value ? 0xff00 : 0)));
+    async writeSingleCoil(id, addr, value) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 5, "addr": addr, "val": value ? 0xff00 : 0 })));
     }
     // 06 写单个保持寄存器
     async WriteSingleRegister(id, addr, value) {
-        return await this.mdFunAchieve(new Uint8Array(this.generateCommand(id, 6, addr, undefined, value)));
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 6, "addr": addr, "val": value })));
+    }
+    // 0F 写多个线圈
+    async writeMultipleCoils(id, addr, len, values) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 15, "addr": addr, "num": len, "val": values })));
+    }
+    // 16 写多个寄存器
+    async writeMultipleRegisters(id, addr, len, values) {
+        return await this.mdFunAchieve(new Uint8Array(
+            this.generateCommand({ "id": id, "fun": 16, "addr": addr, "num": len, "val": values })));
     }
     async mdFunAchieve(data) {
         await this.busy();
@@ -110,7 +126,7 @@ class ModBusRTUMaster {
                     mdParseStep = 2;    // 读错误码
                 } else if ([1, 2, 3, 4].includes(mdParseResult["funCode"])) {
                     mdParseStep = 3;    // 有数据长度
-                } else if ([5, 6].includes(mdParseResult["funCode"])) {
+                } else if ([5, 6, 15, 16].includes(mdParseResult["funCode"])) {
                     mdParseStep = 4;    // 无数据长度
                 } else {
                     throw new Error(`未知的功能码：${mdParseResult["funCode"].toString(16).padStart(2, '0')}`);
@@ -183,12 +199,23 @@ class ModBusRTUMaster {
         return mdParseResult;
     }
     // 生成MD指令
-    generateCommand(id, funCode, addr, num, value, byteNum) {
+    generateCommand(d) {
         let result = [];
-        if ([1, 2, 3, 4].includes(funCode)) {
-            result = [id, funCode, addr >> 8, addr & 0xFF, num >> 8, num & 0xFF];
-        } else if ([5, 6].includes(funCode)) {
-            result = [id, funCode, addr >> 8, addr & 0xFF, value >> 8, value & 0xFF];
+        if ([1, 2, 3, 4].includes(d.fun)) {
+            result = [d.id, d.fun, d.addr >> 8, d.addr & 0xFF, d.num >> 8, d.num & 0xFF];
+        } else if ([5, 6].includes(d.fun)) {
+            result = [d.id, d.fun, d.addr >> 8, d.addr & 0xFF, d.val >> 8, d.val & 0xFF];
+        } else if ([15].includes(d.fun)) {
+            result = [d.id, d.fun, d.addr >> 8, d.addr & 0xFF, d.num >> 8, d.num & 0xFF, Math.ceil(d.num / 8)];
+            result.push(...d.val);
+        } else if ([16].includes(d.fun)) {
+            result = [d.id, d.fun, d.addr >> 8, d.addr & 0xFF, d.num >> 8, d.num & 0xFF, d.num * 2];
+            const buffer = new ArrayBuffer(16);
+            const view = new DataView(buffer);
+            for(let i = 0; i < d.num; i++){
+                view.setUint16(0, d.val[i]);
+                result.push(view.getUint8(0), view.getUint8(1));
+            }
         }
         return [...result, ...this.crc(result)];
     }

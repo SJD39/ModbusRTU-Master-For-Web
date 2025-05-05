@@ -152,7 +152,7 @@
     function loop() {
         timer = setTimeout(async () => {
             for (let i = 0; i < coilCtrls.length; i++) {
-                await master.readCoilsAsync(coilCtrls[i].station, coilCtrls[i].addr, 1).then(data => {
+                await master.readCoils(coilCtrls[i].station, coilCtrls[i].addr, 1).then(data => {
                     coilCtrls[i].setValue(data.formatValue[0]);
                 });
             }

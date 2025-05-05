@@ -36,7 +36,7 @@
         coilCtrl.style.left = clickMenuBox.style.left;
         coilCtrl.style.top = clickMenuBox.style.top;
         coilCtrl.setCoilFun = async function (id, addr, value) {
-            await master.writeSingleCoilAsync(id, addr, value);
+            await master.writeSingleCoil(id, addr, value);
         };
         body_content.append(coilCtrl);
     });
