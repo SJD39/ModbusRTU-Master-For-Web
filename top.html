@@ -156,6 +156,20 @@
                     coilCtrls[i].setValue(data.formatValue[0]);
                 });
             }
+            for (let i = 0; i < regCtrls.length; i++) {
+                if(regCtrls[i].focus === true){
+                    continue;
+                }
+                if(regCtrls[i].valueType === 'UINT16'){
+                    await master.readHoldingRegisters(regCtrls[i].station, regCtrls[i].addr, 1).then(data => {
+                        regCtrls[i].setValue(data.formatValue[0]);
+                    });
+                }else if(regCtrls[i].valueType === 'Float32'){
+                    await master.readHoldingRegisters(regCtrls[i].station, regCtrls[i].addr, 2).then(data => {
+                        regCtrls[i].setValue(data.formatValue);
+                    });
+                }
+            }
             if (runMode.value === 0) {
                 loop();
             }
@@ -164,6 +178,7 @@
 
     runMode.onValueChangeEvent = function (value) {
         coilCtrls = document.getElementsByClassName('coilCtrlBox');
+        regCtrls = document.getElementsByClassName('regCtrlBox');
         if (value === 0) {
             clickMenuBox.style.display = 'none';
             elementMgr.toShowMode();

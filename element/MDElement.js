@@ -91,19 +91,38 @@ class RegCtrl extends MDElement {
         super();
         this.value = 0;
         this.valueType = 'UINT16';
+        this.focus = false;
     }
     connectedCallback() {
         super.connectedCallback();
         this.className = 'regCtrlBox';
         this.RegCtrlValue = document.createElement('span');
-        this.RegCtrlValue.innerText = `值：${this.value}`;
-        this.RegCtrlValue.addEventListener('click', async () => {
+        this.RegCtrlValue.innerText = "值：";
+        this.RegCtrlInput = document.createElement('input');
+        this.RegCtrlInput.style.color = '#39c5bb';
+        this.RegCtrlInput.style.width = '80px';
+        this.RegCtrlInput.type = 'number';
+        this.RegCtrlInput.addEventListener('focusin', async () => {
             if (this.runMode === 0) {
                 return;
             }
-            await this.setRegFun(this.station, this.addr, this.value);
+            this.focus = true;
         });
+        this.RegCtrlInput.addEventListener('focusout', async () => {
+            if (this.runMode === 0) {
+                return;
+            }
+            this.focus = false;
 
+            // 转uint16
+            const buffer = new ArrayBuffer(32);
+            const view = new DataView(buffer);
+            if (InfoType.value === 'Float') {
+                view.setFloat32(0, this.RegCtrlInput.value);
+                await this.setRegFun(this.station, this.addr, 2, [view.getUint16(0), view.getUint16(2)]);
+            }
+        });
+        this.RegCtrlValue.append(this.RegCtrlInput);
         this.Info.append(this.InfoType, this.InfoStation, this.InfoAddr);
         this.append(this.tagBox, this.RegCtrlValue, this.Info, this.delBox);
         this.InfoType.dropDownMenuKey.style.color = '#39c5bb';
@@ -112,7 +131,7 @@ class RegCtrl extends MDElement {
             { key: 'UINT16', value: 'UINT16' },
             { key: 'INT32', value: 'INT32' },
             { key: 'UINT32', value: 'UINT32' },
-            { key: 'Float', value: 'Float' }
+            { key: 'Float32', value: 'Float32' }
         ]);
         this.InfoType.setValue(this.valueType);
     }
