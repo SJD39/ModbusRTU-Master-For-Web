@@ -94,6 +94,16 @@
         <div id="body_record_sendBox" style="width: 100%; display: flex; flex-wrap: wrap;">
             <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;">
                 <drop-down id="generateMd_dataType" menuDir="up" tag="数据类型："></drop-down>
+                <script>
+                    generateMd_dataType.setOptions([
+                        { key: "int16", value: 1 },
+                        { key: "uint16", value: 2 },
+                        { key: "int32", value: 3 },
+                        { key: "uint32", value: 4 },
+                        { key: "float", value: 5 },
+                        { key: "ascll", value: 6 }
+                    ]);
+                </script>
             </div>
             <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;">
                 <span style="width: 50%; display: inline-block;">
