@@ -65,7 +65,7 @@
         clickMenuBox.style.display = 'none';
 
         let station = window.prompt("请输入站号", "1");
-        if (!isValidNumber(station)) {
+        if (!extend.isValidNumber(station)) {
             popupTip.innerText = "请正确输入站号";
             popupTip.duration = 2000;
             popupTip.popup();
@@ -74,7 +74,7 @@
         station = Number(station);
 
         let addr = window.prompt("请输入地址", "0");
-        if (!isValidNumber(addr)) {
+        if (!extend.isValidNumber(addr)) {
             popupTip.innerText = "请正确输入地址";
             popupTip.duration = 2000;
             popupTip.popup();
