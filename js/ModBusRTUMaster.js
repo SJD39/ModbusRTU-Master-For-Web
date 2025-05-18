@@ -184,7 +184,7 @@ class ModBusRTUMaster {
             }
             // crc校验
             if (mdParseStep === 20) {
-                if (this.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
+                if (extend.arrayEqual(this.crc(mdOriginal), [this.mdBuffer[0], this.mdBuffer[1]])) {
                     break;
                 } else {
                     console.log(mdParseResult);
@@ -254,17 +254,5 @@ class ModBusRTUMaster {
             result.push(parseInt(str.substr(i, 2), 16));
         }
         return result;
-    }
-    // 数组对比
-    arrayEqual(arr1, arr2) {
-        if (arr1.length !== arr2.length) {
-            return false;
-        }
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] !== arr2[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 }
