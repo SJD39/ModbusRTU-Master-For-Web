@@ -148,6 +148,9 @@
                         } else if (value === 5 || value === 6) {
                             generateMd_lenSpan.style.display = "none";
                             generateMd_valSpan.style.display = "inline-block";
+                        } else if (value === 16) {
+                            generateMd_lenSpan.style.display = "none";
+                            generateMd_valSpan.style.display = "inline-block";
                         }
                     };
                 </script>
@@ -186,6 +189,14 @@
         } else if (fun === 5 || fun === 6) {
             let val = generateMd_valInput.value;
             cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "val": val });
+        } else if (fun === 15) {
+        } else if (fun === 16) {
+            let val = generateMd_valInput.value;
+            // 判读数据类型
+            if (generateMd_dataType.value === 5) {
+                val = bitConvert.floatToUint16(val);
+            }
+            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": 2, "val": val });
         }
 
         for (let i = 0; i < cmd.length; i++) {
