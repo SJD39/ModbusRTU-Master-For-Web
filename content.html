@@ -93,33 +93,33 @@
         <ul id="body_record_ul"></ul>
         <div id="body_record_sendBox" style="width: 100%; display: flex; flex-wrap: wrap;">
             <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;
-            flex-wrap: wrap;">
-                <p style="width: 100%; display: flex; align-items: center;">
-                    <span style="width:50%;">
-                        <single-choice id=" mModeRW" options='[{key:"读取",value:0},{key:"写入",value:1}]' value="Number(0)"
-                            style="width: max-content;"></single-choice>
-                    </span>
-                    <span style="width: 50%;">
-                        <drop-down id="mModeArea" menuDir="up" tag="区域："></drop-down>
-                        <script>
-                            mModeArea.setOptions([
-                                { key: "离散量", value: 1 },
-                                { key: "线圈", value: 2 },
-                                { key: "保持寄存器", value: 3 },
-                                { key: "输入寄存器", value: 4 }
-                            ]);
-                        </script>
-                    </span>
-                </p>
-
-            </div>
-            <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;">
+            flex-wrap: wrap; display: flex; align-items: center;">
                 <span style="width: 50%; display: inline-block;">
                     站号：
                     <input class="myInput" style="width: 60px;" id="generateMd_id" type="number" min="0" max="247"
                         value="1" />
                 </span>
-                <drop-down id="generateMd_dataType" menuDir="up" tag="数据类型："></drop-down>
+                <span style="width:50%;">
+                    <single-choice id="mModeRW" options='[{key:"读取",value:"read"},{key:"写入",value:"write"}]'
+                        value='String("write")' style="width: max-content;"></single-choice>
+                </span>
+            </div>
+            <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;
+            flex-wrap: wrap; display: flex; align-items: center;">
+                <span style="width: 50%; display: inline-block;">
+                    <drop-down id="mModeArea" menuDir="up" tag="区域："></drop-down>
+                    <script>
+                        mModeArea.setOptions([
+                            { key: "离散量", value: "discrete" },
+                            { key: "线圈", value: "coil" },
+                            { key: "保持寄存器", value: "holdReg" },
+                            { key: "输入寄存器", value: "inReg" }
+                        ]);
+                    </script>
+                </span>
+                <span style="width: 50%;">
+                    <drop-down id="generateMd_dataType" menuDir="up" tag="数据类型："></drop-down>
+                </span>
                 <script>
                     generateMd_dataType.setOptions([
                         { key: "int16", value: 1 },
@@ -145,16 +145,35 @@
                     <input id="generateMd_valInput" class="myInput" style="width: 60px;" type="number" value="0" />
                 </span>
                 <script>
-                    generateMd_fun.onValueChangeEvent = (value) => {
-                        if (value === 1 || value === 2 || value === 3 || value === 4) {
+                    mModeRW.onValueChangeEvent = (value) => {
+                        if (value === 0) {
                             generateMd_lenSpan.style.display = "inline-block";
                             generateMd_valSpan.style.display = "none";
-                        } else if (value === 5 || value === 6) {
+
+                            mModeArea.setOptions([
+                                { key: "离散量", value: "discrete" },
+                                { key: "线圈", value: "coil" },
+                                { key: "保持寄存器", value: "holdReg" },
+                                { key: "输入寄存器", value: "inReg" }
+                            ]);
+                        } else if (value === 1) {
                             generateMd_lenSpan.style.display = "none";
                             generateMd_valSpan.style.display = "inline-block";
-                        } else if (value === 16) {
-                            generateMd_lenSpan.style.display = "none";
-                            generateMd_valSpan.style.display = "inline-block";
+
+                            mModeArea.setOptions([
+                                { key: "线圈", value: "coil" },
+                                { key: "保持寄存器", value: "holdReg" }
+                            ]);
+                        }
+                    };
+
+                    mModeArea.onValueChangeEvent = (value) => {
+                        if (value === 1) {
+                            generateMd_dataType.setOptions([
+                                { key: "bool", value: "bool" },
+                                { key: "uint16", value: "uint16" },
+                                { key: "uint32", value: "uint32" }
+                            ]);
                         }
                     };
                 </script>
@@ -184,9 +203,24 @@
 
     function onGenerateMdClick() {
         let id = Number(generateMd_id.value);
-        let fun = generateMd_fun.value;
-        let cmd;
+        let fun = 0;
         let addr = generateMd_addrInput.value;
+        let cmd;
+
+        // 判断功能码
+        if (mModeRW === 0) {
+            // 读取功能码
+            fun = mModeArea.value;
+        } else if (mModeRW === 1) {
+            // 写入功能码
+            if (mModeArea.value === 1) {
+                fun = 5;
+            } else if (mModeArea.value === 3) {
+                fun = 16;
+            }
+        }
+
+        // 生成指令
         if (fun === 1 || fun === 2 || fun === 3 || fun === 4) {
             let len = generateMd_lenInput.value;
             cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len });

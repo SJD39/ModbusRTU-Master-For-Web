@@ -46,7 +46,11 @@ class Dropdown extends HTMLElement {
             this.dropDownDialog.append(li);
         });
         this.options = options;
-        this.setValue(this.value === undefined ? this.options[0].value : this.value);
+        if (this.options.find(option => option.value === this.value) === undefined) {
+            this.setValue(this.options[0].value);
+        } else {
+            this.setValue(this.value);
+        }
     }
     setValue(value) {
         const option = this.options.find(option => option.value === value);
@@ -56,9 +60,9 @@ class Dropdown extends HTMLElement {
     }
 
     notMenu() {
-        if(this.dropDownDialog.open){
+        if (this.dropDownDialog.open) {
             this.dropDownDialog.close();
-        }else{
+        } else {
             this.dropDownDialog.show();
         }
     }
@@ -72,7 +76,7 @@ class SingleChoice extends HTMLElement {
     }
     connectedCallback() {
         this.options = eval(this.getAttribute("options"));
-        for(let i = 0; i < this.options.length; i++){
+        for (let i = 0; i < this.options.length; i++) {
             let li = document.createElement('li');
             li.className = 'radioLi';
             li.innerText = this.options[i].key;
