@@ -101,7 +101,7 @@
                 </span>
                 <span style="width:50%;">
                     <single-choice id="mModeRW" options='[{key:"读取",value:"read"},{key:"写入",value:"write"}]'
-                        value='String("write")' style="width: max-content;"></single-choice>
+                        value='String("read")' style="width: max-content;"></single-choice>
                 </span>
             </div>
             <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;
@@ -122,12 +122,13 @@
                 </span>
                 <script>
                     generateMd_dataType.setOptions([
-                        { key: "int16", value: 1 },
-                        { key: "uint16", value: 2 },
-                        { key: "int32", value: 3 },
-                        { key: "uint32", value: 4 },
-                        { key: "float", value: 5 },
-                        { key: "ascll", value: 6 }
+                        { key: "bool", value: "bool" },
+                        { key: "int16", value: "int16" },
+                        { key: "uint16", value: "uint16" },
+                        { key: "int32", value: "int32" },
+                        { key: "uint32", value:"uint32" },
+                        { key: "float", value: "float" },
+                        { key: "ascll", value: "ascll" }
                     ]);
                 </script>
             </div>
@@ -146,7 +147,7 @@
                 </span>
                 <script>
                     mModeRW.onValueChangeEvent = (value) => {
-                        if (value === 0) {
+                        if (value === "read") {
                             generateMd_lenSpan.style.display = "inline-block";
                             generateMd_valSpan.style.display = "none";
 
@@ -156,7 +157,7 @@
                                 { key: "保持寄存器", value: "holdReg" },
                                 { key: "输入寄存器", value: "inReg" }
                             ]);
-                        } else if (value === 1) {
+                        } else if (value === "write") {
                             generateMd_lenSpan.style.display = "none";
                             generateMd_valSpan.style.display = "inline-block";
 
