@@ -34,7 +34,7 @@
     #body_record_ul {
         color: #fff;
         width: 100%;
-        height: calc(100% - 245px - 10px);
+        height: calc(100% - 305px - 10px);
         overflow-x: hidden;
         overflow-y: scroll;
     }
@@ -59,191 +59,16 @@
     #body_record_ul li:hover {
         background-color: #ffffff39;
     }
-
-    #body_record_sendBox {
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        color: #fff;
-    }
-
-    #body_record_sendBox>div {
-        width: 100%;
-        display: flex;
-        margin-top: 10px;
-    }
-
-    #body_record_sendBox>div:first-child {
-        margin-top: 0px;
-    }
-
-    #body_record_sendBox textarea {
-        width: calc(100% - 120px - 10px);
-        height: 90px;
-        border-radius: 9px;
-        background-color: #ffffff39;
-        color: #fff;
-        padding: 12px;
-    }
 </style>
 
 <div class="body">
     <div id="body_content"></div>
     <div id="body_record">
         <ul id="body_record_ul"></ul>
-        <div id="body_record_sendBox" style="width: 100%; display: flex; flex-wrap: wrap;">
-            <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;
-            flex-wrap: wrap; display: flex; align-items: center;">
-                <span style="width: 50%; display: inline-block;">
-                    站号：
-                    <input class="myInput" style="width: 60px;" id="generateMd_id" type="number" min="0" max="247"
-                        value="1" />
-                </span>
-                <span style="width:50%;">
-                    <single-choice id="mModeRW" options='[{key:"读取",value:"read"},{key:"写入",value:"write"}]'
-                        value='String("read")' style="width: max-content;"></single-choice>
-                </span>
-            </div>
-            <div style="padding: 10px; background-color: #ffffff39; border-radius: 9px;
-            flex-wrap: wrap; display: flex; align-items: center;">
-                <span style="width: 50%; display: inline-block;">
-                    <drop-down id="mModeArea" menuDir="up" tag="区域："></drop-down>
-                    <script>
-                        mModeArea.setOptions([
-                            { key: "离散量", value: "discrete" },
-                            { key: "线圈", value: "coil" },
-                            { key: "保持寄存器", value: "holdReg" },
-                            { key: "输入寄存器", value: "inReg" }
-                        ]);
-                    </script>
-                </span>
-                <span style="width: 50%;">
-                    <drop-down id="generateMd_dataType" menuDir="up" tag="数据类型："></drop-down>
-                </span>
-                <script>
-                    generateMd_dataType.setOptions([
-                        { key: "bool", value: "bool" },
-                        { key: "int16", value: "int16" },
-                        { key: "uint16", value: "uint16" },
-                        { key: "int32", value: "int32" },
-                        { key: "uint32", value:"uint32" },
-                        { key: "float", value: "float" },
-                        { key: "ascll", value: "ascll" }
-                    ]);
-                </script>
-            </div>
-            <div style="width: 100%; padding: 10px; background-color: #ffffff39; border-radius: 9px;">
-                <span style="display: inline-block; width: 50%;">
-                    地址：
-                    <input id="generateMd_addrInput" class="myInput" style="width: 60px;" type="number" value="0" />
-                </span>
-                <span id="generateMd_lenSpan" style="display: inline-block;">
-                    长度：
-                    <input id="generateMd_lenInput" class="myInput" style="width: 60px;" type="number" value="1" />
-                </span>
-                <span id="generateMd_valSpan" style="display: none;">
-                    数值：
-                    <input id="generateMd_valInput" class="myInput" style="width: 60px;" type="number" value="0" />
-                </span>
-                <script>
-                    mModeRW.onValueChangeEvent = (value) => {
-                        if (value === "read") {
-                            generateMd_lenSpan.style.display = "inline-block";
-                            generateMd_valSpan.style.display = "none";
-
-                            mModeArea.setOptions([
-                                { key: "离散量", value: "discrete" },
-                                { key: "线圈", value: "coil" },
-                                { key: "保持寄存器", value: "holdReg" },
-                                { key: "输入寄存器", value: "inReg" }
-                            ]);
-                        } else if (value === "write") {
-                            generateMd_lenSpan.style.display = "none";
-                            generateMd_valSpan.style.display = "inline-block";
-
-                            mModeArea.setOptions([
-                                { key: "线圈", value: "coil" },
-                                { key: "保持寄存器", value: "holdReg" }
-                            ]);
-                        }
-                    };
-
-                    mModeArea.onValueChangeEvent = (value) => {
-                        if (value === 1) {
-                            generateMd_dataType.setOptions([
-                                { key: "bool", value: "bool" },
-                                { key: "uint16", value: "uint16" },
-                                { key: "uint32", value: "uint32" }
-                            ]);
-                        }
-                    };
-                </script>
-            </div>
-            <div style="justify-content: space-between;">
-                <textarea is="hex-textarea" id="cmdInputTextarea"></textarea>
-                <div style="display: flex; flex-wrap: wrap; width: 120px; align-content: space-between;">
-                    <my-button style="width: 120px; height: 40px;" onclick="onGenerateMdClick()">生成</my-button>
-                    <my-button style="width: 120px; height: 40px;" onclick="onSendMdClick()">发送</my-button>
-                </div>
-            </div>
-        </div>
+        <load-html timing="now" src="./fun/mSend.html"></load-html>
     </div>
 </div>
 <script>
-    async function onSendMdClick() {
-        let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
-        try {
-            await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
-        } catch (e) {
-            popupTip.innerText = e;
-            popupTip.duration = 2000;
-            popupTip.popup();
-            return;
-        }
-    }
-
-    function onGenerateMdClick() {
-        let id = Number(generateMd_id.value);
-        let fun = 0;
-        let addr = generateMd_addrInput.value;
-        let cmd;
-
-        // 判断功能码
-        if (mModeRW === 0) {
-            // 读取功能码
-            fun = mModeArea.value;
-        } else if (mModeRW === 1) {
-            // 写入功能码
-            if (mModeArea.value === 1) {
-                fun = 5;
-            } else if (mModeArea.value === 3) {
-                fun = 16;
-            }
-        }
-
-        // 生成指令
-        if (fun === 1 || fun === 2 || fun === 3 || fun === 4) {
-            let len = generateMd_lenInput.value;
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len });
-        } else if (fun === 5 || fun === 6) {
-            let val = generateMd_valInput.value;
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "val": val });
-        } else if (fun === 15) {
-        } else if (fun === 16) {
-            let val = generateMd_valInput.value;
-            // 判读数据类型
-            if (generateMd_dataType.value === 5) {
-                val = bitConvert.floatToUint16(val);
-            }
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": 2, "val": val });
-        }
-
-        for (let i = 0; i < cmd.length; i++) {
-            cmd[i] = cmd[i].toString(16).padStart(2, '0');
-        }
-        cmdInputTextarea.value = cmd.join(" ");
-    }
-
     class ElementMgr {
         constructor() {
             this.elements;

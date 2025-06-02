@@ -2,15 +2,12 @@ class LoadHTML extends HTMLElement {
     constructor() {
         super();
     }
-
     connectedCallback() {
         this.src;
         this.done = false;
 
         if (this.hasAttribute("src")) {
             this.src = this.getAttribute("src");
-        } else {
-            return;
         }
 
         if (this.getAttribute("timing") === "now") {
@@ -34,7 +31,7 @@ class LoadHTML extends HTMLElement {
 
                 this.done = true;
                 if (this.hasAttribute("callback")) {
-                    setTimeout(this.getAttribute("callback"), 0);
+                    this.getAttribute("callback");
                 }
             });
     }

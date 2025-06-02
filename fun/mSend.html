@@ -1,0 +1,220 @@
+<style>
+    #body_record_sendBox {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        color: #fff;
+    }
+
+    #body_record_sendBox input {
+        width: 60px;
+    }
+
+    #body_record_sendBox my-button {
+        width: 120px;
+        height: 40px;
+    }
+
+    .body_record_sendBox_subDiv {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+
+        border-radius: 9px;
+        background-color: #ffffff39;
+    }
+
+    .body_record_sendBox_subDiv:first-child {
+        margin-top: 0px;
+    }
+
+    .body_record_sendBox_subDiv>span {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .body_record_sendBox_lastDiv {
+        width: 100%;
+        display: flex;
+        margin-top: 10px;
+        justify-content: space-between;
+    }
+
+    #body_record_sendBox textarea {
+        width: calc(100% - 120px - 10px);
+        height: 90px;
+        border-radius: 9px;
+        background-color: #ffffff39;
+        color: #fff;
+        padding: 12px;
+    }
+</style>
+
+<div id="body_record_sendBox">
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            站号：
+            <input class="myInput" id="generateMd_id" type="number" min="0" max="247" value="1" />
+        </span>
+        <span>
+            <single-choice id="mModeRW" options='[{key:"读取",value:"read"},{key:"写入",value:"write"}]'
+                value='String("read")' style="width: max-content;"></single-choice>
+        </span>
+    </div>
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            <drop-down id="mModeArea" menuDir="up" tag="区域："></drop-down>
+        </span>
+        <span>
+            <drop-down id="mSend_dataType" menuDir="up" tag="数据类型："></drop-down>
+        </span>
+    </div>
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            地址：
+            <input id="generateMd_addrInput" class="myInput" type="number" value="0" />
+        </span>
+
+        <span id="generateMd_lenSpan" style="display: inline-block;">
+            长度：
+            <input id="generateMd_lenInput" class="myInput" type="number" value="1" />
+        </span>
+        <span id="generateMd_valSpan" style="display: none;">
+            数值：
+            <input id="generateMd_valInput" class="myInput" type="number" value="0" />
+        </span>
+    </div>
+    <div class="body_record_sendBox_lastDiv">
+        <textarea is="hex-textarea" id="cmdInputTextarea"></textarea>
+        <div style="display: flex; flex-wrap: wrap; width: 120px; height: 90px; align-content: space-between;">
+            <my-button onclick="onGenerateMdClick()">生成</my-button>
+            <my-button onclick="onSendMdClick()">发送</my-button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 设置下拉菜单
+    mModeArea.setOptions([
+        { key: "离散量", value: "discrete" },
+        { key: "线圈", value: "coil" },
+        { key: "保持寄存器", value: "holdReg" },
+        { key: "输入寄存器", value: "inReg" }
+    ]);
+
+    mSend_dataType.setOptions([
+        { key: "bool", value: "bool" },
+        { key: "int16", value: "int16" },
+        { key: "uint16", value: "uint16" },
+        { key: "int32", value: "int32" },
+        { key: "uint32", value: "uint32" },
+        { key: "float", value: "float" },
+        { key: "ascll", value: "ascll" }
+    ]);
+
+    // 读写模式切换
+    mModeRW.onValueChangeEvent = (value) => {
+        if (value === "read") {
+            generateMd_lenSpan.style.display = "inline-block";
+            generateMd_valSpan.style.display = "none";
+
+            mModeArea.setOptions([
+                { key: "离散量", value: "discrete" },
+                { key: "线圈", value: "coil" },
+                { key: "保持寄存器", value: "holdReg" },
+                { key: "输入寄存器", value: "inReg" }
+            ]);
+        } else if (value === "write") {
+            generateMd_lenSpan.style.display = "none";
+            generateMd_valSpan.style.display = "inline-block";
+
+            mModeArea.setOptions([
+                { key: "线圈", value: "coil" },
+                { key: "保持寄存器", value: "holdReg" }
+            ]);
+        }
+    };
+
+    // 功能码选择事件
+    mModeArea.onValueChangeEvent = (value) => {
+        if (value === 1) {
+            mSend_dataType.setOptions([
+                { key: "bool", value: "bool" },
+                { key: "uint16", value: "uint16" },
+                { key: "uint32", value: "uint32" }
+            ]);
+        }
+    };
+
+    async function onSendMdClick() {
+        let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
+        try {
+            await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
+        } catch (e) {
+            popupTip.innerText = e;
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return;
+        }
+    }
+
+    function onGenerateMdClick() {
+        let id = Number(generateMd_id.value);
+        let fun;
+        let addr = generateMd_addrInput.value;
+        let len;
+        let value = generateMd_valInput.value;
+        let cmd;
+
+
+        if (mModeRW === "read") {
+            // 判断读取功能码
+            if (mModeArea.value === "coil") {
+                fun = 1;
+            } else if (mModeArea.value === "discrete") {
+                fun = 2;
+            } else if (mModeArea.value === "holdReg") {
+                fun = 3;
+            } else if (mModeArea.value === "inReg") {
+                fun = 4;
+            }
+        } else if (mModeRW === "write") {
+            // 判断写入功能码
+            if (mModeArea.value === "coil") {
+                fun = 15;
+            } else if (mModeArea.value === "holdReg") {
+                fun = 16;
+            }
+
+            // 转换数据类型
+            if (mSend_dataType.value === "float") {
+                value = bitConvert.floatToUint32(value);
+            }
+        }
+
+        // 生成指令
+        if (fun === 1 || fun === 2 || fun === 3 || fun === 4) {
+            len = generateMd_lenInput.value;
+            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len });
+        } else if (fun === 15) {
+            len =  generateMd_valInput.value;
+            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len, "val": value });
+        } else if (fun === 16) {
+            let val = generateMd_valInput.value;
+            // 判读数据类型
+            if (generateMd_dataType.value === 5) {
+                val = bitConvert.floatToUint16(val);
+            }
+            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": 2, "val": val });
+        }
+
+        for (let i = 0; i < cmd.length; i++) {
+            cmd[i] = cmd[i].toString(16).padStart(2, '0');
+        }
+        cmdInputTextarea.value = cmd.join(" ");
+    }
+</script>
