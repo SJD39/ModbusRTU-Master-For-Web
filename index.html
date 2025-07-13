@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="./css/common.css">
 
     <script src="./js/Extend.js"></script>
-    <script type="module" src="./js/modbus/ModBusRTUMaster.js"></script>
+    <script src="./element/LoadHTML.js"></script>
+
+    <script src="./js/modbus/ModBusRTUMaster.js"></script>
 
     <script src="./js/Controller.js"></script>
 
@@ -18,21 +20,20 @@
     <script src="./element/MDElement.js"></script>
     <link rel="stylesheet" href="./element/MDElement.css">
 
-    <script src="./element/LoadHTML.js"></script>
-
     <script>
+        // 清除默认右键菜单
         window.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
     </script>
-
 </head>
 
 <body>
+    <load-html src="./components/loading.html"></load-html>
     <popup-tip id="popupTip"></popup-tip>
-    <load-html timing="now" src="./top.html"></load-html>
-    <load-html timing="now" callback="{clickMenuLoad.getHtml();}" src="./content.html"></load-html>
-    <load-html id="clickMenuLoad" src="./clickMenu.html"></load-html>
+    <load-html src="./components/top.html"></load-html>
+    <load-html callback="{clickMenuLoad.loadJS();}" src="./components/content.html"></load-html>
+    <load-html when="later" id="clickMenuLoad" src="./components/clickMenu.html"></load-html>
 </body>
 
 </html>

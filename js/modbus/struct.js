@@ -1,4 +1,4 @@
-export class MD_CmdParam {
+class MD_CmdParam {
     constructor(id, fun, addr, num, val) {
         this.id = id;
         this.fun = fun;

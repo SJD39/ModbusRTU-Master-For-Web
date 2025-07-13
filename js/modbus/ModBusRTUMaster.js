@@ -1,6 +1,4 @@
-import { MD_CmdParam } from "./struct.js";
-
-export class ModBusRTUMaster {
+class ModBusRTUMaster {
     constructor() {
         this.taskRunning = false;
         this.port = null;
