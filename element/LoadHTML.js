@@ -4,6 +4,7 @@ class LoadHTML extends HTMLElement {
 
         this.src = "";
         this.when = "now";
+        this.done = false;
     }
     connectedCallback() {
         // 获取文件地址
@@ -21,9 +22,6 @@ class LoadHTML extends HTMLElement {
 
     // 获取html
     getHtml() {
-        // 添加加载中提示
-        this.innerText = "Loading...";
-
         // 加载文件
         fetch(this.src)
             .then(response => response.text())
@@ -34,6 +32,8 @@ class LoadHTML extends HTMLElement {
                 if (this.when === "now") {
                     this.loadJS();
                 }
+
+                this.done = true;
 
                 if (this.hasAttribute("callback")) {
                     this.getAttribute("callback");

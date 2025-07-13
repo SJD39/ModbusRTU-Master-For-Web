@@ -34,6 +34,23 @@
     <load-html src="./components/top.html"></load-html>
     <load-html callback="{clickMenuLoad.loadJS();}" src="./components/content.html"></load-html>
     <load-html when="later" id="clickMenuLoad" src="./components/clickMenu.html"></load-html>
+
+    <script>
+        // 检查所有loadHtml是否加载完毕
+        window.addEventListener('load', function () {
+            let interval = setInterval(() => {
+                let loadHtmls = document.querySelectorAll('load-html');
+                for (let i = 0; i < loadHtmls.length; i++) {
+                    if (!loadHtmls[i].done) {
+                        return;
+                    }
+                }
+                clearInterval(interval);
+                // 所有loadHtml加载完毕
+                loadingPage.style.display = "none";
+            }, 0);
+        })
+    </script>
 </body>
 
 </html>
