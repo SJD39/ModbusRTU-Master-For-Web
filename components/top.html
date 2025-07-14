@@ -10,7 +10,7 @@
 
     .top_content {
         /* 定义大小、位置、颜色、子元素排列方式 */
-        width: 1600px;
+        width: 1400px;
         height: 60px;
         margin: 0 auto;
         color: #fff;
@@ -22,11 +22,18 @@
     .top_ul {
         display: flex;
         align-items: center;
+
+        width: min-content;
     }
 
     .top_ul>li {
-        margin-left: 12px;
-        margin-right: 12px;
+        margin-left: 6px;
+        margin-right: 6px;
+        width: max-content;
+    }
+
+    .top_ul>my-button {
+        width: max-content;
     }
 
     .top_ul my-button {
@@ -45,13 +52,36 @@
             <li>清空画面</li>
         </ul>
         <ul class="top_ul">
-            <li>串口设置</li>
-            <li><drop-down id="baudRateDom" value="Number(115200)" tag="波特率："></drop-down></li>
-            <li><drop-down id="dataBitsDom" value="Number(8)" tag="数据位："></drop-down></li>
-            <li><drop-down id="stopBitsDom" tag="停止位："></drop-down></li>
-            <li><drop-down id="parityDom" tag="奇偶校验："></drop-down></li>
+            <style>
+                #serialSetWindow>dialog {
+                    top: 10px;
+                    padding: 20px;
+                    color: #39c5bb;
+                    width: 180px;
+                    background-color: #ffffff;
+                    border-radius: 9px;
+                    box-shadow: #ffffff 0px 0px 39px;
+                }
+
+                #serialSetWindowBox>div {
+                    margin-bottom: 10px;
+                }
+            </style>
+            <li style="position: relative;">
+                <my-button onClick="serialSetWindow.change()">串口设置</my-button>
+                <popup-window id="serialSetWindow">
+                    <div id="serialSetWindowBox">
+                        <div><drop-down id="baudRateDom" value="Number(115200)" tag="波特率："></drop-down></div>
+                        <div><drop-down id="dataBitsDom" value="Number(8)" tag="数据位："></drop-down></div>
+                        <div><drop-down id="stopBitsDom" value="Number(1)" tag="停止位："></drop-down></div>
+                        <div><drop-down id="parityDom" tag="奇偶校验："></drop-down></div>
+                    </div>
+                </popup-window>
+            </li>
             <li><my-button class="buttonWhite" onclick="openSerial()">打开串口</my-button></li>
+            <li><my-button class="buttonWhite" onclick="closeSerial()">关闭串口</my-button></li>
             <li><drop-down id="refreshRate" value="Number(500)" tag="刷新率："></drop-down></li>
+            <li><my-button class="buttonWhite">妙妙工具</my-button></li>
             <script>
                 baudRateDom.setOptions([
                     { key: "9600", value: 9600 },
@@ -158,14 +188,14 @@
                 });
             }
             for (let i = 0; i < regCtrls.length; i++) {
-                if(regCtrls[i].focus === true){
+                if (regCtrls[i].focus === true) {
                     continue;
                 }
-                if(regCtrls[i].valueType === 'UINT16'){
+                if (regCtrls[i].valueType === 'UINT16') {
                     await master.readHoldingRegisters(regCtrls[i].station, regCtrls[i].addr, 1).then(data => {
                         regCtrls[i].setValue(data.formatValue[0]);
                     });
-                }else if(regCtrls[i].valueType === 'Float32'){
+                } else if (regCtrls[i].valueType === 'Float32') {
                     await master.readHoldingRegisters(regCtrls[i].station, regCtrls[i].addr, 2).then(data => {
                         regCtrls[i].setValue(data.formatValue);
                     });

@@ -167,3 +167,53 @@ class HexTextArea extends HTMLTextAreaElement {
     }
 }
 customElements.define("hex-textarea", HexTextArea, { extends: "textarea" });
+
+// 弹出窗口
+class PopupWindow extends HTMLElement {
+    constructor() {
+        super();
+
+        this.style.position = 'absolute';
+        this.style.left = '0px';
+        this.style.bottom = '0px';
+    }
+
+    connectedCallback() {
+        this.dialogBox = document.createElement('dialog');
+        // 移动innerHTML内容
+        this.dialogBox.innerHTML = this.innerHTML;
+        this.innerHTML = '';
+
+        this.append(this.dialogBox);
+    }
+
+    // 弹出
+    popup() {
+        this.dialogBox.show();
+        this.dialogBox.style.animation = 'popupWindowPopup 0.2s ease-in-out forwards';
+    }
+
+    // 关闭
+    close() {
+        setTimeout(() => {
+            this.dialogBox.close();
+        }, 200);
+        
+        this.dialogBox.style.animation = 'popupWindowDieout 0.2s ease-in-out forwards';
+    }
+
+    // 获取状态
+    isPopup() {
+        return this.dialogBox.open;
+    }
+
+    // 改变
+    change() {
+        if(this.isPopup()){
+            this.close();
+        }else{
+            this.popup();
+        }
+    }
+}
+customElements.define('popup-window', PopupWindow);
