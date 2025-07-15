@@ -2,6 +2,7 @@ drop-down {
     display: inline-block;
 }
 .dropDownDialog{
+    z-index: 9999;
     left: -12px;
     width: max-content;
     background-color: #39c5bb;
@@ -42,42 +43,6 @@ single-choice{
     background-color: #ffffff39;
 }
 
-@keyframes popupTipPopup {
-    0%{
-        opacity: 0;
-        top: 40px;
-    }
-    100%{
-        opacity: 1;
-        top: 60px;
-    }
-}
-
-@keyframes popupTipDieout {
-    0%{
-        opacity: 1;
-        top: 60px;
-    }
-    100%{
-        opacity: 0;
-        top: 40px;
-    }
-}
-
-popup-tip {
-    position: fixed;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-
-    background-color: #fff;
-    color: #39c5bb;
-    padding: 10px;
-    border-radius: 4px;
-    display: none;
-}
-
 my-button {
     background-color: #ffffff39;
     color: #fff;
@@ -110,27 +75,5 @@ my-button:hover {
     }
     100%{
         transform: scale(1);
-    }
-}
-
-@keyframes popupWindowPopup {
-    0%{
-        opacity: 0;
-        transform: scale(0);
-    }
-    100%{
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes popupWindowDieout {
-    0%{
-        opacity: 1;
-        transform: scale(1);
-    }
-    100%{
-        opacity: 0;
-        transform: scale(0);
     }
 }

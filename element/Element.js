@@ -2,16 +2,19 @@ class Dropdown extends HTMLElement {
     constructor() {
         super();
 
-        this.onValueChangeEvent = () => { };
+        this.onValueChangeEventFunc = () => { };
     }
     connectedCallback() {
         // 创建元素
         this.dropDownTag = document.createElement('span');
         this.dropDownMenu = document.createElement('span');
-        this.dropDownMenuKey = document.createElement('span');
+        this.dropDownMenu.style.position = 'relative';
+
+        this.dropDownMenuValue = document.createElement('span');
         this.dropDownDialog = document.createElement('dialog');
         this.dropDownDialog.className = 'dropDownDialog';
-        this.dropDownMenu.style.position = 'relative';
+        this.dropDownDialogUi = document.createElement('ul');
+
         // 初始化tag
         if (this.hasAttribute("tag")) {
             this.dropDownTag.innerText = this.getAttribute("tag");
@@ -28,14 +31,15 @@ class Dropdown extends HTMLElement {
             this.dropDownDialog.style.bottom = '30px';
         }
         // 显示菜单
-        this.dropDownTag.addEventListener('click', () => this.notMenu());
-        this.dropDownMenuKey.addEventListener('click', () => this.notMenu());
+        this.dropDownTag.addEventListener('click', () => this.change());
+        this.dropDownMenuValue.addEventListener('click', () => this.change());
         // 组合元素
-        this.dropDownMenu.append(this.dropDownMenuKey, this.dropDownDialog);
+        this.dropDownDialog.append(this.dropDownDialogUi);
+        this.dropDownMenu.append(this.dropDownMenuValue, this.dropDownDialog);
         this.append(this.dropDownTag, this.dropDownMenu);
     }
     setOptions(options) {
-        this.dropDownDialog.innerHTML = '';
+        this.dropDownDialogUi.innerHTML = '';
         options.forEach((option) => {
             let li = document.createElement('li');
             li.innerText = option.key;
@@ -43,7 +47,7 @@ class Dropdown extends HTMLElement {
                 this.setValue(option.value);
                 this.dropDownDialog.close();
             });
-            this.dropDownDialog.append(li);
+            this.dropDownDialogUi.append(li);
         });
         this.options = options;
         if (this.options.find(option => option.value === this.value) === undefined) {
@@ -54,13 +58,17 @@ class Dropdown extends HTMLElement {
     }
     setValue(value) {
         const option = this.options.find(option => option.value === value);
-        this.dropDownMenuKey.innerText = option.key;
+        this.dropDownMenuValue.innerText = option.key;
         this.value = value;
-        this.onValueChangeEvent(value);
+        this.onValueChangeEventFunc(value);
     }
 
-    notMenu() {
-        if (this.dropDownDialog.open) {
+    isOpen() {
+        return this.dropDownDialog.open;
+    }
+
+    change() {
+        if (this.isOpen()) {
             this.dropDownDialog.close();
         } else {
             this.dropDownDialog.show();
@@ -72,7 +80,7 @@ customElements.define("drop-down", Dropdown);
 class SingleChoice extends HTMLElement {
     constructor() {
         super();
-        this.onValueChangeEvent = () => { };
+        this.onValueChangeEventFunc = () => { };
     }
     connectedCallback() {
         this.options = eval(this.getAttribute("options"));
@@ -93,30 +101,10 @@ class SingleChoice extends HTMLElement {
             this.children[i].className = this.children[i].innerText === option.key ? 'radioLi radioLiSelected' : 'radioLi';
         }
         this.value = value;
-        this.onValueChangeEvent(value);
+        this.onValueChangeEventFunc(value);
     }
 }
 customElements.define("single-choice", SingleChoice);
-
-class PopupTip extends HTMLElement {
-    constructor() {
-        super();
-        this.duration = 1000;
-    }
-
-    popup() {
-        this.style.display = 'block';
-        this.style.animation = 'popupTipPopup 0.5s ease-out forwards';
-        setTimeout(() => {
-            this.style.animation = 'popupTipDieout 0.5s ease-out forwards';
-            setTimeout(() => {
-                this.style.display = 'none';
-            }, 500);
-        }, this.duration);
-    }
-}
-
-customElements.define("popup-tip", PopupTip);
 
 class MyButton extends HTMLElement {
     constructor() {
@@ -167,53 +155,3 @@ class HexTextArea extends HTMLTextAreaElement {
     }
 }
 customElements.define("hex-textarea", HexTextArea, { extends: "textarea" });
-
-// 弹出窗口
-class PopupWindow extends HTMLElement {
-    constructor() {
-        super();
-
-        this.style.position = 'absolute';
-        this.style.left = '0px';
-        this.style.bottom = '0px';
-    }
-
-    connectedCallback() {
-        this.dialogBox = document.createElement('dialog');
-        // 移动innerHTML内容
-        this.dialogBox.innerHTML = this.innerHTML;
-        this.innerHTML = '';
-
-        this.append(this.dialogBox);
-    }
-
-    // 弹出
-    popup() {
-        this.dialogBox.show();
-        this.dialogBox.style.animation = 'popupWindowPopup 0.2s ease-in-out forwards';
-    }
-
-    // 关闭
-    close() {
-        setTimeout(() => {
-            this.dialogBox.close();
-        }, 200);
-        
-        this.dialogBox.style.animation = 'popupWindowDieout 0.2s ease-in-out forwards';
-    }
-
-    // 获取状态
-    isPopup() {
-        return this.dialogBox.open;
-    }
-
-    // 改变
-    change() {
-        if(this.isPopup()){
-            this.close();
-        }else{
-            this.popup();
-        }
-    }
-}
-customElements.define('popup-window', PopupWindow);
