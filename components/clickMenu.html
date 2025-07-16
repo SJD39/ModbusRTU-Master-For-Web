@@ -8,6 +8,7 @@
 </div>
 
 <script>
+
     body_content.addEventListener('click', function (e) {
         if (runMode.value != 1) {
             return;
@@ -55,7 +56,7 @@
         regCtrl.style.left = clickMenuBox.style.left;
         regCtrl.style.top = clickMenuBox.style.top;
         regCtrl.setCoilFun = async function (id, addr, value) {
-            
+
         };
         body_content.append(regCtrl);
     });
