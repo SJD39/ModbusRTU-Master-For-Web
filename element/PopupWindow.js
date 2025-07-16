@@ -72,6 +72,13 @@ class PopupWindow extends HTMLElement {
         } else {
             this.popup();
         }
+
+        // 互斥
+        document.querySelectorAll('popup-window').forEach(item => {
+            if (item !== this) {
+                item.close();
+            }
+        });
     }
 }
 customElements.define('popup-window', PopupWindow);
