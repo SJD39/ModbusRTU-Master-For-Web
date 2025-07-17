@@ -1,4 +1,4 @@
 // 生成MD指令
-function generateMdCommand(){
-
+function generateMdCommand(mdCommandMaterial){
+    return master.generateCommand(mdCommandMaterial);
 }

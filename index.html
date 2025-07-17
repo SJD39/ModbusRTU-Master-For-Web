@@ -15,7 +15,7 @@
     <script src="./js/Controller.js"></script>
 
     <!-- 引用元素类 -->
-    <script src="./element/LoadHTML.js"></script>
+    <script src="./element/Load.js"></script>
     <script src="./element/Element.js"></script>
     <script src="./element/Dropdown.js"></script>
     <script src="./element/PopupWindow.js"></script>
@@ -39,21 +39,24 @@
     <load-html src="./components/loading.html"></load-html>
     <popup-tip id="popupTip"></popup-tip>
     <load-html src="./components/top.html"></load-html>
-    <load-html callback="{clickMenuLoad.loadJS();}" src="./components/content.html"></load-html>
     <load-html when="later" id="clickMenuLoad" src="./components/clickMenu.html"></load-html>
+    <load-html callback="clickMenuLoad.permitLoadTag = true" src="./components/content.html"></load-html>
 
     <script>
         // 检查所有loadHtml是否加载完毕
+        var loaded = false;
         window.addEventListener('load', function () {
             let interval = setInterval(() => {
                 let loadHtmls = document.querySelectorAll('load-html');
                 for (let i = 0; i < loadHtmls.length; i++) {
-                    if (!loadHtmls[i].done) {
+                    if (!loadHtmls[i].loadDoneTag) {
                         return;
                     }
                 }
                 clearInterval(interval);
                 // 所有loadHtml加载完毕
+                loaded = true;
+
                 loadingPage.style.display = "none";
             }, 0);
         })
