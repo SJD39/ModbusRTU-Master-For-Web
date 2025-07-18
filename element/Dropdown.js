@@ -38,6 +38,7 @@ class Dropdown extends HTMLElement {
         this.styleSheet.textContent = `
             drop-down {
                 display: inline-block;
+                white-space: nowrap;
             }
             .dropDownDialog{
                 z-index: 9999;
