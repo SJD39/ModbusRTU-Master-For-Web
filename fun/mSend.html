@@ -98,6 +98,39 @@
 </div>
 
 <script>
+    var mdFunDependencyTree = {
+        "read": [
+            {
+                "discrete": [
+                    { "dataType": "bool", "num": "free", "unit": 1 },
+                    { "dataType": "uint16", "num": "free", "unit": 16 }]
+            },
+            {
+                "coil": [
+                    { "dataType": "bool", "num": "free", "unit": 1 },
+                    { "dataType": "uint16", "num": "free", "unit": 16 }]
+            },
+            {
+                "holdReg": [
+                    { "dataType": "uint16", "num": "free", "unit": 1 },
+                    { "dataType": "uint32", "num": "free", "unit": 2 },
+                    { "dataType": "float", "num": "free", "unit": 2 }
+                ]
+            },
+            {
+                "inReg": [
+                    { "dataType": "uint16", "num": "free", "unit": 1 },
+                    { "dataType": "uint32", "num": "free", "unit": 2 },
+                    { "dataType": "float", "num": "free", "unit": 2 }
+                ]
+            }
+        ],
+        "write": [
+            { "coil": [] },
+            { "holdReg": [] }
+        ]
+    }
+
     // 设置下拉菜单
     mModeArea.setOptions([
         { key: "离散量", value: "discrete" },
@@ -201,7 +234,7 @@
             len = generateMd_lenInput.value;
             cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len });
         } else if (fun === 15) {
-            len =  generateMd_valInput.value;
+            len = generateMd_valInput.value;
             cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len, "val": value });
         } else if (fun === 16) {
             let val = generateMd_valInput.value;
