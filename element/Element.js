@@ -1,32 +1,3 @@
-class SingleChoice extends HTMLElement {
-    constructor() {
-        super();
-        this.onValueChangeEventFunc = () => { };
-    }
-    connectedCallback() {
-        this.options = eval(this.getAttribute("options"));
-        for (let i = 0; i < this.options.length; i++) {
-            let li = document.createElement('li');
-            li.className = 'radioLi';
-            li.innerText = this.options[i].key;
-            li.addEventListener('click', () => {
-                this.setValue(this.options[i].value);
-            });
-            this.append(li);
-        }
-        this.setValue(eval(this.getAttribute("value")));
-    }
-    setValue(value) {
-        const option = this.options.find(option => option.value === value);
-        for (let i = 0; i < this.children.length; i++) {
-            this.children[i].className = this.children[i].innerText === option.key ? 'radioLi radioLiSelected' : 'radioLi';
-        }
-        this.value = value;
-        this.onValueChangeEventFunc(value);
-    }
-}
-customElements.define("single-choice", SingleChoice);
-
 class MyButton extends HTMLElement {
     constructor() {
         super();
@@ -38,13 +9,13 @@ class MyButton extends HTMLElement {
             // 点击动画
             this.style.animation = 'buttonDown 0.1s ease-out forwards';
 
+            // 用户callback
+            if (this.hasAttribute('onClick')) {
+                this.getAttribute('onClick');
+            }
+
             document.addEventListener('mouseup', () => {
                 this.style.animation = 'buttonUp 0.05s ease-out forwards';
-
-                // 用户callback
-                if (this.hasAttribute('onClick')) {
-                    this.getAttribute('onClick');
-                }
             });
         });
     }

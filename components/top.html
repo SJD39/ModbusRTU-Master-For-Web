@@ -46,8 +46,7 @@
     <div class="top_content">
         <ul class="top_ul">
             <li>
-                <single-choice id="runMode" options='[{key: "运行", value: 0},{key: "编辑", value: 1}]'
-                    value="Number(1)"></single-choice>
+                <single-choice id="runMode"></single-choice>
             </li>
             <li>清空画面</li>
         </ul>
@@ -83,6 +82,7 @@
             <li><drop-down id="refreshRate" value="Number(500)" tag="刷新率："></drop-down></li>
             <li><my-button class="buttonWhite">妙妙工具</my-button></li>
             <script>
+                runMode.setOptions([{ key: "运行", value: 0 }, { key: "编辑", value: 1 }]);
                 baudRateDom.setOptions([
                     { key: "9600", value: 9600 },
                     { key: "19200", value: 19200 },

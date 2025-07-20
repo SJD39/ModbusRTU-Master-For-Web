@@ -61,8 +61,7 @@
             <input class="myInput" id="generateMd_id" type="number" min="0" max="247" value="1" />
         </span>
         <span>
-            <single-choice id="mModeRW" options='[{key:"读取",value:"read"},{key:"写入",value:"write"}]'
-                value='String("read")' style="width: max-content;"></single-choice>
+            <single-choice id="mModeRW"></single-choice>
         </span>
     </div>
     <div class="body_record_sendBox_subDiv">
@@ -98,78 +97,77 @@
 </div>
 
 <script>
-    var mdFunDependencyTree = {
-        "read": [
-            {
-                "discrete": [
-                    { "dataType": "bool", "num": "free", "unit": 1 },
-                    { "dataType": "uint16", "num": "free", "unit": 16 }]
-            },
-            {
-                "coil": [
-                    { "dataType": "bool", "num": "free", "unit": 1 },
-                    { "dataType": "uint16", "num": "free", "unit": 16 }]
-            },
-            {
-                "holdReg": [
-                    { "dataType": "uint16", "num": "free", "unit": 1 },
-                    { "dataType": "uint32", "num": "free", "unit": 2 },
-                    { "dataType": "float", "num": "free", "unit": 2 }
-                ]
-            },
-            {
-                "inReg": [
-                    { "dataType": "uint16", "num": "free", "unit": 1 },
-                    { "dataType": "uint32", "num": "free", "unit": 2 },
-                    { "dataType": "float", "num": "free", "unit": 2 }
-                ]
-            }
-        ],
-        "write": [
-            { "coil": [] },
-            { "holdReg": [] }
-        ]
+    // 选择树
+    var mdFunSelTree = {
+        "read": {
+            "离散量": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "线圈": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "保持寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }],
+            "输入寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }]
+        },
+        "write": {
+            "线圈": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "保持寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }]
+        }
     }
 
-    // 设置下拉菜单
-    mModeArea.setOptions([
-        { key: "离散量", value: "discrete" },
-        { key: "线圈", value: "coil" },
-        { key: "保持寄存器", value: "holdReg" },
-        { key: "输入寄存器", value: "inReg" }
-    ]);
+    // 设置dom
+    mModeRW.setOptions([{ key: "读取", value: "read" }, { key: "写入", value: "write" }]);
 
-    mSend_dataType.setOptions([
-        { key: "bool", value: "bool" },
-        { key: "int16", value: "int16" },
-        { key: "uint16", value: "uint16" },
-        { key: "int32", value: "int32" },
-        { key: "uint32", value: "uint32" },
-        { key: "float", value: "float" },
-        { key: "ascll", value: "ascll" }
-    ]);
+    // 初始化 区域选择
+    function initAreaSel() {
+        mModeArea.options = [];
+
+        for (let i = 0; i < Object.keys(mdFunSelTree[mModeRW.value]).length; i++) {
+            let key = Object.keys(mdFunSelTree[mModeRW.value])[i];
+            mModeArea.options.push({ key: key, value: key });
+        }
+        mModeArea.setOptions(mModeArea.options);
+    }
+    initAreaSel();
+
+    // 初始化 数据类型选择
+    function initDataTypeSel() {
+        mSend_dataType.options = [];
+        for (let i = 0; i < mdFunSelTree[mModeRW.value][mModeArea.value].length; i++) {
+            let dataType = mdFunSelTree[mModeRW.value][mModeArea.value][i];
+            mSend_dataType.options.push({ key: dataType["dataType"], value: dataType["dataType"] });
+        }
+        mSend_dataType.setOptions(mSend_dataType.options);
+    }
+    initDataTypeSel();
 
     // 读写模式切换
-    mModeRW.onValueChangeEvent = (value) => {
+    mModeRW.onValueChangeEventFunc = (value) => {
         if (value === "read") {
             generateMd_lenSpan.style.display = "inline-block";
             generateMd_valSpan.style.display = "none";
-
-            mModeArea.setOptions([
-                { key: "离散量", value: "discrete" },
-                { key: "线圈", value: "coil" },
-                { key: "保持寄存器", value: "holdReg" },
-                { key: "输入寄存器", value: "inReg" }
-            ]);
+            initAreaSel();
         } else if (value === "write") {
             generateMd_lenSpan.style.display = "none";
             generateMd_valSpan.style.display = "inline-block";
-
-            mModeArea.setOptions([
-                { key: "线圈", value: "coil" },
-                { key: "保持寄存器", value: "holdReg" }
-            ]);
+            initAreaSel();
         }
+    };
+
+    // 区域选择变化
+    mModeArea.onValueChangeEventFunc = (value) => { 
+        initDataTypeSel();
     };
 
     // 功能码选择事件

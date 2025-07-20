@@ -2,7 +2,7 @@ class Dropdown extends HTMLElement {
     constructor() {
         super();
 
-        this.options = { key: "", value: "" };
+        this.options = [{ key: "", value: "" }];
         this.onValueChangeEventFunc = () => { };
     }
     connectedCallback() {
@@ -79,6 +79,8 @@ class Dropdown extends HTMLElement {
             this.dropDownDialogUi.append(li);
         });
         this.options = options;
+
+        // 试图保留原值
         if (this.options.find(option => option.value === this.value) === undefined) {
             this.setValue(this.options[0].value);
         } else {
