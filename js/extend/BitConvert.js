@@ -19,11 +19,19 @@ class BitConvert {
         this.view.setUint32(0, uint32);
         return this.view.getFloat32(0);
     }
+    uint32ToUint16(uint32) {
+        this.view.setUint32(0, uint32);
+        return [this.view.getUint16(0), this.view.getUint16(2)];
+    }
     uint32ToByte(uint32) {
         this.view.setUint32(0, uint32);
         return [this.view.getUint8(0), this.view.getUint8(1), this.view.getUint8(2), this.view.getUint8(3)];
     }
-    int16ToUint16(int16) { 
+    uint16ToUint8(uint16) {
+        this.view.setUint16(0, uint16);
+        return [this.view.getUint8(0), this.view.getUint8(1)];
+    }
+    int16ToUint16(int16) {
         this.view.setInt16(0, int16);
         return this.view.getUint16(0);
     }

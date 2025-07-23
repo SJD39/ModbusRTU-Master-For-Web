@@ -126,6 +126,32 @@
         }
     }
 
+    // 数据格式倍率
+    var dataFormatMul = {
+        "线圈": {
+            "bool": 1,
+            "uint16": 16
+        },
+        "离散量": {
+            "bool": 1,
+            "uint16": 16
+        },
+        "保持寄存器": {
+            "int16": 1,
+            "uint16": 1,
+            "int32": 2,
+            "uint32": 2,
+            "float": 2
+        },
+        "输入寄存器": {
+            "int16": 1,
+            "uint16": 1,
+            "int32": 2,
+            "uint32": 2,
+            "float": 2
+        }
+    }
+
     // 设置dom
     mModeRW.setOptions([{ key: "读取", value: "read" }, { key: "写入", value: "write" }]);
 
@@ -166,19 +192,8 @@
     };
 
     // 区域选择变化
-    mModeArea.onValueChangeEventFunc = (value) => { 
+    mModeArea.onValueChangeEventFunc = (value) => {
         initDataTypeSel();
-    };
-
-    // 功能码选择事件
-    mModeArea.onValueChangeEvent = (value) => {
-        if (value === 1) {
-            mSend_dataType.setOptions([
-                { key: "bool", value: "bool" },
-                { key: "uint16", value: "uint16" },
-                { key: "uint32", value: "uint32" }
-            ]);
-        }
     };
 
     async function onSendMdClick() {
@@ -194,57 +209,53 @@
     }
 
     function onGenerateMdClick() {
-        let id = Number(generateMd_id.value);
-        let fun;
-        let addr = generateMd_addrInput.value;
-        let len;
-        let value = generateMd_valInput.value;
-        let cmd;
+        let data = {};
+        data.id = Number(generateMd_id.value);
+        data.addr = Number(generateMd_addrInput.value);
+        data.num = Number(generateMd_lenInput.value);
+        data.num *= dataFormatMul[mModeArea.value][mSend_dataType.value];
+        data.val = Number(generateMd_valInput.value);
+        let cmd = [];
 
-
-        if (mModeRW === "read") {
+        if (mModeRW.value === "read") {
             // 判断读取功能码
-            if (mModeArea.value === "coil") {
-                fun = 1;
-            } else if (mModeArea.value === "discrete") {
-                fun = 2;
-            } else if (mModeArea.value === "holdReg") {
-                fun = 3;
-            } else if (mModeArea.value === "inReg") {
-                fun = 4;
+            if (mModeArea.value === "线圈") {
+                data.fun = 1;
+            } else if (mModeArea.value === "离散量") {
+                data.fun = 2;
+            } else if (mModeArea.value === "保持寄存器") {
+                data.fun = 3;
+            } else if (mModeArea.value === "输入寄存器") {
+                data.fun = 4;
             }
-        } else if (mModeRW === "write") {
+        } else if (mModeRW.value === "write") {
             // 判断写入功能码
-            if (mModeArea.value === "coil") {
-                fun = 15;
-            } else if (mModeArea.value === "holdReg") {
-                fun = 16;
-            }
-
-            // 转换数据类型
-            if (mSend_dataType.value === "float") {
-                value = bitConvert.floatToUint32(value);
+            if (mModeArea.value === "线圈") {
+                if (mSend_dataType.value === "bool") {
+                    data.fun = 5;
+                    data.val = data.val ? 0xFF00 : 0x0000;
+                } else if (mSend_dataType.value === "uint16") {
+                    data.fun = 15;
+                    data.val = [bitConvert.uint16ToUint8(data.val)[1], bitConvert.uint16ToUint8(data.val)[0]];
+                }
+            } else if (mModeArea.value === "保持寄存器") {
+                if (mSend_dataType.value === "uint16") {
+                    data.fun = 6;
+                } else if (mSend_dataType.value === "uint32") {
+                    data.fun = 16;
+                    data.val = bitConvert.uint32ToUint16(data.val);
+                } else if (mSend_dataType.value === "float") {
+                    data.fun = 16;
+                    data.val = bitConvert.floatToUint16(data.val);
+                }
             }
         }
 
-        // 生成指令
-        if (fun === 1 || fun === 2 || fun === 3 || fun === 4) {
-            len = generateMd_lenInput.value;
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len });
-        } else if (fun === 15) {
-            len = generateMd_valInput.value;
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": len, "val": value });
-        } else if (fun === 16) {
-            let val = generateMd_valInput.value;
-            // 判读数据类型
-            if (generateMd_dataType.value === 5) {
-                val = bitConvert.floatToUint16(val);
-            }
-            cmd = master.generateCommand({ "id": id, "fun": fun, "addr": addr, "num": 2, "val": val });
-        }
+        console.log(data);
+        cmd = master.generateCommand(data);
 
         for (let i = 0; i < cmd.length; i++) {
-            cmd[i] = cmd[i].toString(16).padStart(2, '0');
+            cmd[i] = cmd[i].toString(16).padStart(2, '0').toUpperCase();
         }
         cmdInputTextarea.value = cmd.join(" ");
     }
