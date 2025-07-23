@@ -3,6 +3,7 @@
     padding: 0;
     box-sizing: border-box;
 
+    -webkit-user-select: none;
     user-select: none;
     font-size: 16px;
 
@@ -19,8 +20,9 @@ input::-webkit-outer-spin-button {
     -webkit-appearance: none;
 }
 
-input[type="number"]{
+input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 html,
@@ -30,7 +32,7 @@ body {
 }
 
 /* 很莫名其妙，不知道为什么body不在顶上 */
-body{
+body {
     position: absolute;
     top: 0;
 }
@@ -39,7 +41,7 @@ li {
     list-style: none;
 }
 
-.myInput{
+.myInput {
     padding: 3px;
     border-radius: 3px;
 }

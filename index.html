@@ -7,31 +7,61 @@
     <title>ModBus HMI for Web</title>
     <link rel="stylesheet" href="./css/common.css">
 
+    <!-- 引用扩展类 -->
     <script src="./js/Extend.js"></script>
-    <script src="./js/ModBusRTUMaster.js"></script>
+    <script src="./js/extend/BitConvert.js"></script>
+    <script src="./js/modbus/ModBusRTUMaster.js"></script>
+
     <script src="./js/Controller.js"></script>
 
+    <!-- 引用元素类 -->
+    <script src="./element/Load.js"></script>
     <script src="./element/Element.js"></script>
+    <script src="./element/Dropdown.js"></script>
+    <script src="./element/SingleChoice.js"></script>
+    <script src="./element/PopupWindow.js"></script>
+    <script src="./element/PopupTip.js"></script>
     <link rel="stylesheet" href="./element/Element.css">
 
     <script src="./element/MDElement.js"></script>
     <link rel="stylesheet" href="./element/MDElement.css">
 
-    <script src="./element/LoadHTML.js"></script>
+    <script src="./js/View.js"></script>
 
     <script>
+        // 清除默认右键菜单
         window.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
     </script>
-
 </head>
 
 <body>
+    <load-html src="./components/loading.html"></load-html>
     <popup-tip id="popupTip"></popup-tip>
-    <load-html timing="now" src="./top.html"></load-html>
-    <load-html timing="now" callback="{clickMenuLoad.getHtml();}" src="./content.html"></load-html>
-    <load-html id="clickMenuLoad" src="./clickMenu.html"></load-html>
+    <load-html src="./components/top.html"></load-html>
+    <load-html when="later" id="clickMenuLoad" src="./components/clickMenu.html"></load-html>
+    <load-html callback="clickMenuLoad.permitLoadTag = true" src="./components/content.html"></load-html>
+
+    <script>
+        // 检查所有loadHtml是否加载完毕
+        var loaded = false;
+        window.addEventListener('load', function () {
+            let interval = setInterval(() => {
+                let loadHtmls = document.querySelectorAll('load-html');
+                for (let i = 0; i < loadHtmls.length; i++) {
+                    if (!loadHtmls[i].loadDoneTag) {
+                        return;
+                    }
+                }
+                clearInterval(interval);
+                // 所有loadHtml加载完毕
+                loaded = true;
+
+                loadingPage.style.display = "none";
+            }, 0);
+        })
+    </script>
 </body>
 
 </html>

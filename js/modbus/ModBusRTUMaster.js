@@ -212,7 +212,7 @@ class ModBusRTUMaster {
             result = [d.id, d.fun, d.addr >> 8, d.addr & 0xFF, d.num >> 8, d.num & 0xFF, d.num * 2];
             const buffer = new ArrayBuffer(16);
             const view = new DataView(buffer);
-            for(let i = 0; i < d.num; i++){
+            for (let i = 0; i < d.num; i++) {
                 view.setUint16(0, d.val[i]);
                 result.push(view.getUint8(0), view.getUint8(1));
             }

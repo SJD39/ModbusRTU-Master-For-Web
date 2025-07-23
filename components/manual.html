@@ -1,0 +1,262 @@
+<style>
+    #body_record_sendBox {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        color: #fff;
+    }
+
+    #body_record_sendBox input {
+        width: 60px;
+    }
+
+    #body_record_sendBox my-button {
+        width: 120px;
+        height: 40px;
+    }
+
+    .body_record_sendBox_subDiv {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+
+        border-radius: 9px;
+        background-color: #ffffff39;
+    }
+
+    .body_record_sendBox_subDiv:first-child {
+        margin-top: 0px;
+    }
+
+    .body_record_sendBox_subDiv>span {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .body_record_sendBox_lastDiv {
+        width: 100%;
+        display: flex;
+        margin-top: 10px;
+        justify-content: space-between;
+    }
+
+    #body_record_sendBox textarea {
+        width: calc(100% - 120px - 10px);
+        height: 90px;
+        border-radius: 9px;
+        background-color: #ffffff39;
+        color: #fff;
+        padding: 12px;
+    }
+</style>
+
+<div id="body_record_sendBox">
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            站号：
+            <input class="myInput" id="generateMd_id" type="number" min="0" max="247" value="1" />
+        </span>
+        <span>
+            <single-choice id="mModeRW"></single-choice>
+        </span>
+    </div>
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            <drop-down id="mModeArea" menuDir="up" tag="区域："></drop-down>
+        </span>
+        <span>
+            <drop-down id="mSend_dataType" menuDir="up" tag="数据类型："></drop-down>
+        </span>
+    </div>
+    <div class="body_record_sendBox_subDiv">
+        <span>
+            地址：
+            <input id="generateMd_addrInput" class="myInput" type="number" value="0" />
+        </span>
+
+        <span id="generateMd_lenSpan" style="display: inline-block;">
+            长度：
+            <input id="generateMd_lenInput" class="myInput" type="number" value="1" />
+        </span>
+        <span id="generateMd_valSpan" style="display: none;">
+            数值：
+            <input id="generateMd_valInput" class="myInput" type="number" value="0" />
+        </span>
+    </div>
+    <div class="body_record_sendBox_lastDiv">
+        <textarea is="hex-textarea" id="cmdInputTextarea"></textarea>
+        <div style="display: flex; flex-wrap: wrap; width: 120px; height: 90px; align-content: space-between;">
+            <my-button onclick="onGenerateMdClick()">生成</my-button>
+            <my-button onclick="onSendMdClick()">发送</my-button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 选择树
+    var mdFunSelTree = {
+        "read": {
+            "离散量": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "线圈": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "保持寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }],
+            "输入寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }]
+        },
+        "write": {
+            "线圈": [
+                { "dataType": "bool", "num": "free", "unit": 1 },
+                { "dataType": "uint16", "num": "free", "unit": 16 }],
+            "保持寄存器": [
+                { "dataType": "uint16", "num": "free", "unit": 1 },
+                { "dataType": "uint32", "num": "free", "unit": 2 },
+                { "dataType": "float", "num": "free", "unit": 2 }]
+        }
+    }
+
+    // 数据格式倍率
+    var dataFormatMul = {
+        "线圈": {
+            "bool": 1,
+            "uint16": 16
+        },
+        "离散量": {
+            "bool": 1,
+            "uint16": 16
+        },
+        "保持寄存器": {
+            "int16": 1,
+            "uint16": 1,
+            "int32": 2,
+            "uint32": 2,
+            "float": 2
+        },
+        "输入寄存器": {
+            "int16": 1,
+            "uint16": 1,
+            "int32": 2,
+            "uint32": 2,
+            "float": 2
+        }
+    }
+
+    // 设置dom
+    mModeRW.setOptions([{ key: "读取", value: "read" }, { key: "写入", value: "write" }]);
+
+    // 初始化 区域选择
+    function initAreaSel() {
+        mModeArea.options = [];
+
+        for (let i = 0; i < Object.keys(mdFunSelTree[mModeRW.value]).length; i++) {
+            let key = Object.keys(mdFunSelTree[mModeRW.value])[i];
+            mModeArea.options.push({ key: key, value: key });
+        }
+        mModeArea.setOptions(mModeArea.options);
+    }
+    initAreaSel();
+
+    // 初始化 数据类型选择
+    function initDataTypeSel() {
+        mSend_dataType.options = [];
+        for (let i = 0; i < mdFunSelTree[mModeRW.value][mModeArea.value].length; i++) {
+            let dataType = mdFunSelTree[mModeRW.value][mModeArea.value][i];
+            mSend_dataType.options.push({ key: dataType["dataType"], value: dataType["dataType"] });
+        }
+        mSend_dataType.setOptions(mSend_dataType.options);
+    }
+    initDataTypeSel();
+
+    // 读写模式切换
+    mModeRW.onValueChangeEventFunc = (value) => {
+        if (value === "read") {
+            generateMd_lenSpan.style.display = "inline-block";
+            generateMd_valSpan.style.display = "none";
+            initAreaSel();
+        } else if (value === "write") {
+            generateMd_lenSpan.style.display = "none";
+            generateMd_valSpan.style.display = "inline-block";
+            initAreaSel();
+        }
+    };
+
+    // 区域选择变化
+    mModeArea.onValueChangeEventFunc = (value) => {
+        initDataTypeSel();
+    };
+
+    async function onSendMdClick() {
+        let cmd = cmdInputTextarea.value.replace(/[^0-9a-fA-F]/g, '');
+        try {
+            await master.mdFunAchieve(new Uint8Array(master.hexStrToArray(cmd)));
+        } catch (e) {
+            popupTip.innerText = e;
+            popupTip.duration = 2000;
+            popupTip.popup();
+            return;
+        }
+    }
+
+    function onGenerateMdClick() {
+        let data = {};
+        data.id = Number(generateMd_id.value);
+        data.addr = Number(generateMd_addrInput.value);
+        data.num = Number(generateMd_lenInput.value);
+        data.num *= dataFormatMul[mModeArea.value][mSend_dataType.value];
+        data.val = Number(generateMd_valInput.value);
+        let cmd = [];
+
+        if (mModeRW.value === "read") {
+            // 判断读取功能码
+            if (mModeArea.value === "线圈") {
+                data.fun = 1;
+            } else if (mModeArea.value === "离散量") {
+                data.fun = 2;
+            } else if (mModeArea.value === "保持寄存器") {
+                data.fun = 3;
+            } else if (mModeArea.value === "输入寄存器") {
+                data.fun = 4;
+            }
+        } else if (mModeRW.value === "write") {
+            // 判断写入功能码
+            if (mModeArea.value === "线圈") {
+                if (mSend_dataType.value === "bool") {
+                    data.fun = 5;
+                    data.val = data.val ? 0xFF00 : 0x0000;
+                } else if (mSend_dataType.value === "uint16") {
+                    data.fun = 15;
+                    data.val = [bitConvert.uint16ToUint8(data.val)[1], bitConvert.uint16ToUint8(data.val)[0]];
+                }
+            } else if (mModeArea.value === "保持寄存器") {
+                if (mSend_dataType.value === "uint16") {
+                    data.fun = 6;
+                } else if (mSend_dataType.value === "uint32") {
+                    data.fun = 16;
+                    data.val = bitConvert.uint32ToUint16(data.val);
+                } else if (mSend_dataType.value === "float") {
+                    data.fun = 16;
+                    data.val = bitConvert.floatToUint16(data.val);
+                }
+            }
+        }
+
+        console.log(data);
+        cmd = master.generateCommand(data);
+
+        for (let i = 0; i < cmd.length; i++) {
+            cmd[i] = cmd[i].toString(16).padStart(2, '0').toUpperCase();
+        }
+        cmdInputTextarea.value = cmd.join(" ");
+    }
+</script>
