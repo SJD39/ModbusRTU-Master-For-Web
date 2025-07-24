@@ -10,6 +10,7 @@ class ModBusRTUMaster {
         // md解析
         this.mdBuffer = [];
         this.mdOriginal = [];
+        this.byteOrder = 'little-endian';
         this.timer;
 
         this.onWriteCallback = () => { };
