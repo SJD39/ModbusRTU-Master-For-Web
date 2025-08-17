@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>存储值显示</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .inptuArea {
+            margin: 10px;
+            padding: 10px;
+
+            border-radius: 9px;
+            border: 1px solid #39c5bb;
+            color: #39c5bb;
+        }
+
+        .outputArea {
+            margin: 10px;
+            padding: 10px;
+
+            border-radius: 9px;
+            background-color: #39c5bb;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="inptuArea">
+        <p>
+            输入值：
+            <input type="text" id="storeValueShowInput">
+        </p>
+        <p>
+            值类型：
+            <select id="storeValueShowType">
+                <option value="int16">int16</option>
+                <option value="uint16">uint16</option>
+                <option value="int32">int32</option>
+                <option value="uint32">uint32</option>
+                <option value="float">float</option>
+            </select>
+        </p>
+        <p>
+            字节序：
+            <select id="storeValueShowEndian">
+                <option value="little">小端序</option>
+                <option value="big">大端序</option>
+                <option value="mixed">混合序</option>
+            </select>
+        </p>
+        <div>
+            <button>缓存1</button>
+            <button>缓存2</button>
+            <button>缓存3</button>
+        </div>
+    </div>
+    <div class="outputArea outputArea_sync">
+        <ul>
+            <li>二进制：<span id="storeValueShowBin"></span></li>
+            <li>八进制：<span id="storeValueShowOct"></span></li>
+            <li>十进制：<span id="storeValueShowDec"></span></li>
+            <li>十六进制：<span id="storeValueShowHex"></span></li>
+        </ul>
+    </div>
+    <div class="outputArea outputArea_buffer1">
+        <ul>
+            <li>二进制：<span id="storeValueShowBin_buffer1"></span></li>
+            <li>八进制：<span id="storeValueShowOct_buffer1"></span></li>
+            <li>十进制：<span id="storeValueShowDec_buffer1"></span></li>
+            <li>十六进制：<span id="storeValueShowHex_buffer1"></span></li>
+        </ul>
+    </div>
+    <div class="outputArea outputArea_buffer2">
+        <ul>
+            <li>二进制：<span id="storeValueShowBin_buffer2"></span></li>
+            <li>八进制：<span id="storeValueShowOct_buffer2"></span></li>
+            <li>十进制：<span id="storeValueShowDec_buffer2"></span></li>
+            <li>十六进制：<span id="storeValueShowHex_buffer2"></span></li>
+        </ul>
+    </div>
+    <div class="outputArea outputArea_buffer3">
+        <ul>
+            <li>二进制：<span id="storeValueShowBin_buffer3"></span></li>
+            <li>八进制：<span id="storeValueShowOct_buffer3"></span></li>
+            <li>十进制：<span id="storeValueShowDec_buffer3"></span></li>
+            <li>十六进制：<span id="storeValueShowHex_buffer3"></span></li>
+        </ul>
+    </div>
+</body>
+
+<script>
+    class BitConvert {
+        constructor() {
+            this.buffer = new ArrayBuffer(4);
+            this.view = new DataView(this.buffer);
+        }
+
+        int16ToUint16(int16) {
+            this.view.setInt16(0, int16);
+            return this.view.getUint16(0);
+        }
+
+        int32ToUint32(int32) {
+            this.view.setInt32(0, int32);
+            return this.view.getUint32(0);
+        }
+
+        floatToUint32(float) {
+            this.view.setFloat32(0, float);
+            return this.view.getUint32(0);
+        }
+    }
+    var bitConvert = new BitConvert();
+
+    class storeValue {
+        constructor() {
+            this.bin = "";
+            this.oct = "";
+            this.dec = "";
+            this.hex = "";
+        }
+    }
+
+    var storeValues = {
+        sync: new storeValue(),
+        buffer: [
+            new storeValue(),
+            new storeValue(),
+            new storeValue()
+        ]
+    }
+
+    storeValueShowInput.addEventListener("change", function () {
+        let inputValue = storeValueShowInput.value;
+        let inputType = storeValueShowType.value;
+        let inputEndian = storeValueShowEndian.value;
+        let outputValue = new storeValue;
+
+        // 全部转为uint16或uint32
+        let hexValue;
+        if (inputType == "int16") {
+            hexValue = bitConvert.int16ToUint16(inputValue);
+        } else if (inputType == "uint16") {
+            hexValue = inputValue;
+        } else if (inputType == "int32") {
+            hexValue = bitConvert.int32ToUint32(inputValue);
+        } else if (inputType == "uint32") {
+            hexValue = inputValue;
+        } else if (inputType == "float") {
+            hexValue = bitConvert.floatToUint32(inputValue);
+        }
+
+        // 处理字节序
+        hexValue = hexValue.toString(16);
+
+
+        // 转换为对引进制
+        outputValue.bin = tempValue.toString(2);
+        outputValue.oct = tempValue.toString(8);
+        outputValue.dec = tempValue.toString(10);
+        outputValue.hex = tempValue.toString(16);
+
+    })
+
+
+</script>
+
+</html>
