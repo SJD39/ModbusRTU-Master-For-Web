@@ -52,7 +52,7 @@
         </ul>
         <ul class="top_ul">
             <style>
-                #serialSetWindow>dialog {
+                popup-window>dialog {
                     top: 10px;
                     padding: 20px;
                     color: #39c5bb;
@@ -62,7 +62,7 @@
                     box-shadow: #ffffff 0px 0px 39px;
                 }
 
-                #serialSetWindowBox>div {
+                popup-window>div {
                     margin-bottom: 10px;
                 }
             </style>
@@ -80,7 +80,14 @@
             <li><my-button class="buttonWhite" onclick="openSerial()">打开串口</my-button></li>
             <li><my-button class="buttonWhite" onclick="closeSerial()">关闭串口</my-button></li>
             <li><drop-down id="refreshRate" value="Number(500)" tag="刷新率："></drop-down></li>
-            <li><my-button class="buttonWhite">妙妙工具</my-button></li>
+            <li style="position: relative;">
+                <my-button class="buttonWhite" onClick="toolsWindow.change()">妙妙工具</my-button>
+                <popup-window id="toolsWindow">
+                    <ul>
+                        <li><a href="./components/tools/storeValueShow/index.html">储存值转换</a></li>
+                    </ul>
+                </popup-window>
+            </li>
             <script>
                 runMode.setOptions([{ key: "运行", value: 0 }, { key: "编辑", value: 1 }]);
                 baudRateDom.setOptions([
