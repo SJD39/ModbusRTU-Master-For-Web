@@ -132,6 +132,40 @@
             this.view.setFloat32(0, float);
             return this.view.getUint32(0);
         }
+
+        toHexArray(hex) {
+            // 转16进制，补零
+            hex = hex.toString(16);
+            if (hex.length % 2 != 0) {
+                hex = "0" + hex;
+            }
+
+            // 转16进制数组
+            let hexArray = [];
+            for (let i = 0; i < hex.length; i += 2) {
+                hexArray.push(hex.substring(i, i + 2));
+            }
+
+            return hexArray;
+        }
+
+        toLittle(hexArray) {
+            let littleArray = [];
+            for (let i = 0; i < hexArray.length; i++) {
+                littleArray.push(hexArray[hexArray.length - 1 - i]);
+            }
+
+            return littleArray;
+        }
+
+        toMiddle(hexArray) {
+            let middleArray = [];
+            for (let i = 0; i < hexArray.length; i += 2) {
+                middleArray.push(hexArray[i + 1], hexArray[i]);
+            }
+
+            return middleArray;
+        }
     }
     var bitConvert = new BitConvert();
 
