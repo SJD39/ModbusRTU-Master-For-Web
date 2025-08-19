@@ -27,6 +27,11 @@ button {
     margin-right: 10px;
 }
 
+input {
+    border: none;
+    outline: none;
+}
+
 .inptuArea {
     margin: 5px;
     padding: 10px;
@@ -42,6 +47,12 @@ button {
     position: relative;
 
     border-radius: 9px;
+    background-color: #39c5bb;
+    color: #fff;
+}
+
+.outputArea_sync input {
+    width: calc(100% - 160px);
     background-color: #39c5bb;
     color: #fff;
 }

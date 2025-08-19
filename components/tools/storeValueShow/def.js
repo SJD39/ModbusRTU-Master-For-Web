@@ -5,6 +5,7 @@ class BitConvert {
         this.view = new DataView(this.buffer);
     }
 
+    // 数据类型转Byte
     int16ToByte(int16) {
         this.view.setInt16(0, int16);
         return [this.view.getUint8(0), this.view.getUint8(1)];
@@ -30,16 +31,44 @@ class BitConvert {
         return [this.view.getUint8(0), this.view.getUint8(1), this.view.getUint8(2), this.view.getUint8(3)];
     }
 
+    // byte转数据类型
     ByteToUint16(byteArray) {
-        this.view.setUint8(0, byteArray[0], byteArray[1]);
+        this.view.setUint8(0, byteArray[0]);
+        this.view.setUint8(1, byteArray[1]);
         return this.view.getUint16(0);
     }
 
+    ByteToInt16(byteArray) {
+        this.view.setUint8(0, byteArray[0]);
+        this.view.setUint8(1, byteArray[1]);
+        return this.view.getInt16(0);
+    }
+
     ByteToUint32(byteArray) {
-        this.view.setUint8(0, byteArray[0], byteArray[1], byteArray[2], byteArray[3]);
+        this.view.setUint8(0, byteArray[0]);
+        this.view.setUint8(1, byteArray[1]);
+        this.view.setUint8(2, byteArray[2]);
+        this.view.setUint8(3, byteArray[3]);
         return this.view.getUint32(0);
     }
 
+    ByteToInt32(byteArray) { 
+        this.view.setUint8(0, byteArray[0]);
+        this.view.setUint8(1, byteArray[1]);
+        this.view.setUint8(2, byteArray[2]);
+        this.view.setUint8(3, byteArray[3]);
+        return this.view.getInt32(0);
+    }
+
+    ByteToFloat(byteArray) {
+        this.view.setUint8(0, byteArray[0]);
+        this.view.setUint8(1, byteArray[1]);
+        this.view.setUint8(2, byteArray[2]);
+        this.view.setUint8(3, byteArray[3]);
+        return this.view.getFloat32(0);
+    }
+
+    // 字节序转换
     toLittle(byteArray) {
         let littleArray = [];
         for (let i = 0; i < byteArray.length; i++) {

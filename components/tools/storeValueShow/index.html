@@ -11,12 +11,12 @@
 <body>
     <div class="inptuArea">
         <p>
-            输入值：
-            <input type="text" id="storeValueShowInput">
+            意义值：
+            <input type="text" id="meanValue_dom">
         </p>
         <p>
             值类型：
-            <select id="storeValueShowType">
+            <select id="valueType_dom">
                 <option value="int16">int16</option>
                 <option value="uint16">uint16</option>
                 <option value="int32">int32</option>
@@ -26,21 +26,21 @@
         </p>
         <p>
             字节序：
-            <select id="storeValueShowEndian">
+            <select id="endian_dom">
                 <option value="little">小端序</option>
                 <option value="big">大端序</option>
             </select>
         </p>
         <p>
             字节交换：
-            <select id="storeValueShowByteSwap">
+            <select id="byteSwap_dom">
                 <option value="none">不交换</option>
                 <option value="swap">交换</option>
             </select>
         </p>
         <p>
             字节序示例：0x12 0x34 0x56 0x78 ->
-            <span id="storeValueShowEndianExample"></span>
+            <span id="storeValueExample_dom"></span>
         </p>
         <div>
             <button onclick="cacheStoreValue(0)">缓存1</button>
@@ -49,9 +49,9 @@
     </div>
     <div class="outputArea outputArea_sync">
         <ul>
-            <li>二进制：<span id="storeValueShowBin_sync"></span></li>
-            <li>十进制：<span id="storeValueShowDec_sync"></span></li>
-            <li>十六进制：<span id="storeValueShowHex_sync"></span></li>
+            <li>二进制：<input type="text" id="storeValueBin_sync_dom"></input></li>
+            <li>十进制：<input type="text" id="storeValueDec_sync_dom"></input></li>
+            <li>十六进制：<input type="text" id="storeValueHex_sync_dom"></input></li>
         </ul>
         <p class="areaTag">sync</p>
     </div>
@@ -75,4 +75,7 @@
 
 <script src="./def.js"></script>
 <script src="./js.js"></script>
+<script src="./calculateStoreValue.js"></script>
+<script src="./calculateMeanValue.js"></script>
+<script src="./example.js"></script>
 </html>
