@@ -1,3 +1,5 @@
+// 功能描述：用户输入意义值，根据选择的参数，计算存储值
+
 // 绑定更新方法
 meanValue_dom.addEventListener("input", calculateStoreValue);
 valueType_dom.addEventListener("change", calculateStoreValue);
@@ -6,34 +8,19 @@ byteSwap_dom.addEventListener("change", calculateStoreValue);
 
 // 计算存储值
 function calculateStoreValue() {
-    let meanValue = meanValue_dom.value;
-    let valueType = valueType_dom.value;
-    let valueEndian = endian_dom.value;
-    let valueSwap = byteSwap_dom.value;
     let outputValue = new storeValue;
 
-    // 计算存储值
+    getUserInput();
     // 全部转为Byte数组
-    let byteArray;
-    if (valueType === "int16") {
-        byteArray = bitConvert.int16ToByte(meanValue);
-    } else if (valueType === "uint16") {
-        byteArray = bitConvert.uint16ToByte(meanValue);
-    } else if (valueType === "int32") {
-        byteArray = bitConvert.int32ToByte(meanValue);
-    } else if (valueType === "uint32") {
-        byteArray = bitConvert.uint32ToByte(meanValue);
-    } else if (valueType === "float") {
-        byteArray = bitConvert.floatToByte(meanValue);
-    }
+    let byteArray = bitConvert.toByteArray(userInput.meanValue, userInput.type);
 
     // 处理字节序
-    if (valueEndian === "little") {
+    if (userInput.endian === "little") {
         byteArray = bitConvert.toLittle(byteArray);
     }
 
     // 处理字节交换
-    if (valueSwap === "swap") {
+    if (userInput.swap === "swap") {
         byteArray = bitConvert.byteSwap(byteArray);
     }
 
@@ -53,9 +40,3 @@ function calculateStoreValue() {
     updateShow();
 }
 
-// 更新显示
-function updateShow() {
-    storeValueBin_sync_dom.value = storeValues.sync.bin;
-    storeValueDec_sync_dom.value = storeValues.sync.dec;
-    storeValueHex_sync_dom.value = storeValues.sync.hex;
-}

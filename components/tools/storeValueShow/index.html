@@ -9,13 +9,9 @@
 </head>
 
 <body>
-    <div class="inptuArea">
-        <p>
-            意义值：
-            <input type="text" id="meanValue_dom">
-        </p>
-        <p>
-            值类型：
+    <div class="meanArea">
+        <p>意义值：<input type="text" id="meanValue_dom"></p>
+        <p>值类型：
             <select id="valueType_dom">
                 <option value="int16">int16</option>
                 <option value="uint16">uint16</option>
@@ -24,22 +20,19 @@
                 <option value="float">float</option>
             </select>
         </p>
-        <p>
-            字节序：
+        <p>字节序：
             <select id="endian_dom">
                 <option value="little">小端序</option>
                 <option value="big">大端序</option>
             </select>
         </p>
-        <p>
-            字节交换：
+        <p>字节交换：
             <select id="byteSwap_dom">
                 <option value="none">不交换</option>
                 <option value="swap">交换</option>
             </select>
         </p>
-        <p>
-            字节序示例：0x12 0x34 0x56 0x78 ->
+        <p>字节序示例：0x12 0x34 0x56 0x78 ->
             <span id="storeValueExample_dom"></span>
         </p>
         <div>
@@ -47,35 +40,36 @@
             <button onclick="cacheStoreValue(1)">缓存2</button>
         </div>
     </div>
-    <div class="outputArea outputArea_sync">
+    <div class="storeArea storeArea_sync">
         <ul>
-            <li>二进制：<input type="text" id="storeValueBin_sync_dom"></input></li>
-            <li>十进制：<input type="text" id="storeValueDec_sync_dom"></input></li>
-            <li>十六进制：<input type="text" id="storeValueHex_sync_dom"></input></li>
+            <li>二进制：<input type="text" id="storeShowBin_sync_dom"></input></li>
+            <li>十进制：<input type="text" id="storeShowDec_sync_dom"></input></li>
+            <li>十六进制：<input type="text" id="storeShowHex_sync_dom"></input></li>
         </ul>
         <p class="areaTag">sync</p>
     </div>
-    <div class="outputArea outputArea_cache1">
+    <div class="storeArea">
         <ul>
-            <li>二进制：<span id="storeValueShowBin_cache1"></span></li>
-            <li>十进制：<span id="storeValueShowDec_cache1"></span></li>
-            <li>十六进制：<span id="storeValueShowHex_cache1"></span></li>
+            <li>二进制：<span id="storeShowBin_cache1_dom"></span></li>
+            <li>十进制：<span id="storeShowDec_cache1_dom"></span></li>
+            <li>十六进制：<span id="storeShowHex_cache1_dom"></span></li>
         </ul>
         <p class="areaTag">cache1</p>
     </div>
-    <div class="outputArea outputArea_cache2">
+    <div class="storeArea">
         <ul>
-            <li>二进制：<span id="storeValueShowBin_cache2"></span></li>
-            <li>十进制：<span id="storeValueShowDec_cache2"></span></li>
-            <li>十六进制：<span id="storeValueShowHex_cache2"></span></li>
+            <li>二进制：<span id="storeShowBin_cache2_dom"></span></li>
+            <li>十进制：<span id="storeShowDec_cache2_dom"></span></li>
+            <li>十六进制：<span id="storeShowHex_cache2_dom"></span></li>
         </ul>
         <p class="areaTag">cache2</p>
     </div>
 </body>
 
-<script src="./def.js"></script>
-<script src="./js.js"></script>
+<script src="./Extend.js"></script>
+<script src="./View.js"></script>
 <script src="./calculateStoreValue.js"></script>
 <script src="./calculateMeanValue.js"></script>
 <script src="./example.js"></script>
+
 </html>

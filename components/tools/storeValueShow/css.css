@@ -32,7 +32,7 @@ input {
     outline: none;
 }
 
-.inptuArea {
+.meanArea {
     margin: 5px;
     padding: 10px;
 
@@ -41,7 +41,7 @@ input {
     color: #39c5bb;
 }
 
-.outputArea {
+.storeArea {
     margin: 5px;
     padding: 10px;
     position: relative;
@@ -51,7 +51,7 @@ input {
     color: #fff;
 }
 
-.outputArea_sync input {
+.storeArea_sync input {
     width: calc(100% - 160px);
     background-color: #39c5bb;
     color: #fff;

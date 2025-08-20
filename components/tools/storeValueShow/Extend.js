@@ -52,7 +52,7 @@ class BitConvert {
         return this.view.getUint32(0);
     }
 
-    ByteToInt32(byteArray) { 
+    ByteToInt32(byteArray) {
         this.view.setUint8(0, byteArray[0]);
         this.view.setUint8(1, byteArray[1]);
         this.view.setUint8(2, byteArray[2]);
@@ -85,13 +85,22 @@ class BitConvert {
         }
         return swapArray;
     }
-}
 
-// 定义存储值结构体
-class storeValue {
-    constructor() {
-        this.bin = "";
-        this.dec = "";
-        this.hex = "";
+    //  
+    toByteArray(value, valueType) {
+        let byteArray = [];
+        if (valueType === "int16") {
+            byteArray = bitConvert.int16ToByte(value);
+        } else if (valueType === "uint16") {
+            byteArray = bitConvert.uint16ToByte(value);
+        } else if (valueType === "int32") {
+            byteArray = bitConvert.int32ToByte(value);
+        } else if (valueType === "uint32") {
+            byteArray = bitConvert.uint32ToByte(value);
+        } else if (valueType === "float") {
+            byteArray = bitConvert.floatToByte(value);
+        }
+        return byteArray;
     }
 }
+var bitConvert = new BitConvert();
