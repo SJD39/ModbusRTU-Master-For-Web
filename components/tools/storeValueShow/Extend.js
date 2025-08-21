@@ -3,6 +3,44 @@ class BitConvert {
     constructor() {
         this.buffer = new ArrayBuffer(4);
         this.view = new DataView(this.buffer);
+
+        this.valueTypeData = {
+            int16: {
+                byteLen: 2,
+                range:{
+                    max: 32767,
+                    min: -32768
+                }
+            },
+            uint16: {
+                byteLen: 2,
+                range:{
+                    max: 65535,
+                    min: 0
+                }
+            },
+            int32: {
+                byteLen: 4,
+                range:{
+                    max: 2147483647,
+                    min: -2147483648
+                }
+            },
+            uint32: {
+                byteLen: 4,
+                range:{
+                    max: 4294967295,
+                    min: 0
+                }
+            },
+            float: {
+                byteLen: 4,
+                range:{
+                    max: 3.40282347E+38,
+                    min: -3.40282347E+38
+                }
+            }
+        }
     }
 
     // 数据类型转Byte

@@ -9,7 +9,7 @@ class storeValue {
 
 // 定义显示存储值类
 var storeValues = {
-    meanValue:"",
+    meanValue: "",
     sync: new storeValue(),
     example: "",
     cache: [
@@ -21,7 +21,7 @@ var storeValues = {
 // 更新显示
 function updateShow() {
     meanValue_dom.value = storeValues.meanValue;
-    
+
     storeShowBin_sync_dom.value = storeValues.sync.bin;
     storeShowDec_sync_dom.value = storeValues.sync.dec;
     storeShowHex_sync_dom.value = storeValues.sync.hex;
@@ -71,3 +71,24 @@ function cacheStoreValue(index) {
 
     updateShow();
 }
+
+// 调整用户输入限制
+function inputLimt(max, min) {
+    if (meanValue_dom.value > max) {
+        meanValue_dom.value = max;
+    } else if (meanValue_dom.value < min) {
+        meanValue_dom.value = min;
+    }
+}
+
+// 设置用户输入限制
+function setInputLimt() {
+    let max = bitConvert.valueTypeData[valueType_dom.value].range.max;
+    let min = bitConvert.valueTypeData[valueType_dom.value].range.min;
+
+    inputLimt(max, min);
+}
+
+valueType_dom.addEventListener("change", setInputLimt);
+meanValue_dom.addEventListener("input", setInputLimt);
+setInputLimt();
