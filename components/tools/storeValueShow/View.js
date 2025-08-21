@@ -9,6 +9,7 @@ class storeValue {
 
 // 定义显示存储值类
 var storeValues = {
+    meanValue:"",
     sync: new storeValue(),
     example: "",
     cache: [
@@ -19,6 +20,8 @@ var storeValues = {
 
 // 更新显示
 function updateShow() {
+    meanValue_dom.value = storeValues.meanValue;
+    
     storeShowBin_sync_dom.value = storeValues.sync.bin;
     storeShowDec_sync_dom.value = storeValues.sync.dec;
     storeShowHex_sync_dom.value = storeValues.sync.hex;
@@ -51,6 +54,8 @@ var userInput = new UserInput();
 // 获取用户输入
 function getUserInput() {
     userInput.meanValue = meanValue_dom.value;
+    storeValues.meanValue = meanValue_dom.value;
+
     userInput.type = valueType_dom.value;
     userInput.endian = endian_dom.value;
     userInput.swap = byteSwap_dom.value;

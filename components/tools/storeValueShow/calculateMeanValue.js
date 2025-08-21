@@ -1,81 +1,37 @@
-// // 存储值转意义值
+// 存储值转意义值
+storeShowBin_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "bin"));
+storeShowDec_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "dec"));
+storeShowHex_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "hex"));
 
-// storeValueBin_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "bin"));
-// storeValueDec_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "dec"));
-// storeValueHex_sync_dom.addEventListener("input", (e) => calculateMeanValue(e.target.value, "hex"));
+function calculateMeanValue(value, type) {
+    getUserInput();
 
-// function calculateMeanValue(value, type) {
-//     let meanType = valueType_dom.value;
+    // 去除value字符串空格
+    value = value.replace(/\s/g, '');
 
-//     // 去除value字符串空格
-//     value = value.replace(/\s/g, '');
+    // 转换为字节数组
+    let byteArray;
+    let byteArrayType = ["uint16", "int16"].includes(userInput.type) ? "uint16" : "uint32";
 
-//     // 统一为16进制
-//     let hexValue;
-//     if (type === "bin") {
-//         hexValue = parseInt(value, 2).toString(16);
-//     } else if (type === "dec") {
-//         hexValue = parseInt(value, 10).toString(16);
-//     }else{
-//         hexValue = value;
-//     }
+    if (type === "bin") {
+        byteArray = bitConvert.toByteArray(parseInt(value, 2), byteArrayType);
+    } else if (type === "dec") {
+        byteArray = bitConvert.toByteArray(parseInt(value, 10), byteArrayType);
+    } else if (type === "hex") {
+        byteArray = bitConvert.toByteArray(parseInt(value, 16), byteArrayType);
+    }
 
-//     // 补零
-//     if (hexValue.length % 2 !== 0) {
-//         hexValue = "0" + hexValue;
-//     }
+    // 处理字节序
+    if (endian_dom.value === "little") {
+        byteArray = bitConvert.toLittle(byteArray);
+    }
+    if (byteSwap_dom.value === "swap") {
+        byteArray = bitConvert.byteSwap(byteArray);
+    }
 
-//     // 生成字节数组
-//     let byteArray = [];
-//     for (let i = 0; i < hexValue.length; i += 2) {
-//         byteArray.push(hexValue.substr(i, 2));
-//     }
+    // 转换为数据类型
+    storeValues.meanValue = bitConvert.toValue(byteArray, userInput.type);
 
-//     // 补字节
-//     if(["int16", "uint16"].includes(meanType)){
-//         while (byteArray.length < 2) {
-//             byteArray.unshift("00");
-//         }
-//     }else if(["int32", "uint32", "float"].includes(meanType)){
-//         while (byteArray.length < 4) {
-//             byteArray.unshift("00");
-//         }
-//     }
-
-//     // 处理字节序
-//     if (endian_dom.value === "little") {
-//         byteArray = bitConvert.toLittle(byteArray);
-//     }
-
-//     // 处理字节交换
-//     if (byteSwap_dom.value === "swap") {
-//         byteArray = bitConvert.byteSwap(byteArray);
-//     }
-
-//     // 转换为十进制
-//     for(let i = 0; byteArray.length > i; i++){
-//         byteArray[i] = parseInt(byteArray[i], 16);
-//     }
-
-//     // 计算意义值
-//     switch (meanType) {
-//         case "int16":
-//             meanValue = bitConvert.ByteToInt16(byteArray);
-//             break;
-//         case "uint16":
-//             meanValue = bitConvert.ByteToUint16(byteArray);
-//             break;
-//         case "int32":
-//             meanValue = bitConvert.ByteToInt32(byteArray);
-//             break;
-//         case "uint32":
-//             meanValue = bitConvert.ByteToUint32(byteArray);
-//             break;
-//         case "float":
-//             meanValue = bitConvert.ByteToFloat(byteArray);
-//             break;
-//     }
-
-//     meanValue_dom.value = meanValue;
-//     return meanValue;
-// }
+    updateShow();
+    calculateStoreValue();
+}

@@ -102,5 +102,22 @@ class BitConvert {
         }
         return byteArray;
     }
+
+    // 字节数组转数据类型
+    toValue(byteArray, valueType) {
+        let value;
+        if (valueType === "int16") {
+            value = bitConvert.ByteToInt16(byteArray);
+        } else if (valueType === "uint16") {
+            value = bitConvert.ByteToUint16(byteArray);
+        } else if (valueType === "int32") {
+            value = bitConvert.ByteToInt32(byteArray);
+        } else if (valueType === "uint32") {
+            value = bitConvert.ByteToUint32(byteArray);
+        } else if (valueType === "float") {
+            value = bitConvert.ByteToFloat(byteArray);
+        }
+        return value;
+    }
 }
 var bitConvert = new BitConvert();
