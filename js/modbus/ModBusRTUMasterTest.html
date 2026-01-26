@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModBusRTUMasterTest</title>
+
+    <script src="./ModBusRTUMaster.js"></script>
+</head>
+
+<body>
+    <!-- 配置串口信息 -->
+    <h1>串口配置：</h1>
+    <button id="sel_port_btn">选择串口</button>
+
+    <span>波特率：</span>
+    <select id="baud_rate_select">
+        <option value="9600">9600</option>
+        <option value="19200">19200</option>
+        <option value="115200">115200</option>
+    </select>
+
+    <span>数据位：</span>
+    <select id="data_bits_select">
+        <option value="8">8</option>
+        <option value="7">7</option>
+    </select>
+
+    <span>停止位：</span>
+    <select id="stop_bits_select">
+        <option value="1">1</option>
+        <option value="2">2</option>
+    </select>
+
+    <span>奇偶校验：</span>
+    <select id="parity_select">
+        <option value="none">无</option>
+        <option value="even">偶校验</option>
+        <option value="odd">奇校验</option>
+    </select>
+
+    <button id="open_port_btn">打开串口</button>
+</body>
+<script>
+    var serialPort = null;
+    var modBusRTUMaster = new ModBusRTUMaster();
+
+    // 选择串口
+    sel_port_btn.addEventListener("click", async () => {
+        try {
+            serialPort = await navigator.serial.requestPort();
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+        console.log(serialPort);
+    });
+
+    // 打开串口
+    open_port_btn.addEventListener("click", async () => {
+        let port_options = {
+            baudRate: Number(baud_rate_select.value),
+            dataBits: Number(data_bits_select.value),
+            stopBits: Number(stop_bits_select.value),
+            parity: parity_select.value,
+            bufferSize: 1024,
+        };
+        await serialPort.open(port_options);
+        
+        modBusRTUMaster.startMaster(serialPort);
+    });
+
+    // 读取串口数据
+    modBusRTUMaster.onReadCallback = function (timestamp, data) {
+        console.log(timestamp, data);
+    }
+</script>
+
+</html>
