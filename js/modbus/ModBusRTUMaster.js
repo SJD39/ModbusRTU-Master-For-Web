@@ -39,8 +39,8 @@ class ModBusRTUMaster {
     async startMaster(port) {
         try {
             this.port = port;
-        } catch {
-            throw new Error(`串口初始化失败:${error}`);
+        } catch (e) {
+            throw new Error(`串口初始化失败:${e}`);
         }
         this.working = true;
 
@@ -63,7 +63,7 @@ class ModBusRTUMaster {
         try {
             read_result = await this.reader.read();
         } catch (e) {
-            throw new Error(`串口读取失败:${error}`);
+            throw new Error(`串口读取失败:${e}`);
         } finally {
             await this.reader.releaseLock();
         }
@@ -130,18 +130,11 @@ class ModBusRTUMaster {
         await this.busy();
         this.dataBuffer = [];
 
-        // 
-        this.timer = setTimeout(() => {
-            this.taskRunning = false;
-            return { "error": "处理超时" };
-        }, 50);
-
         // 写指令
         await this.writeSerial(data);
 
         // 读返回值
         let result = await this.parse_data();
-        clearTimeout(this.timer);
 
         return result;
     }
@@ -150,7 +143,7 @@ class ModBusRTUMaster {
     async busy() {
         while (this.taskRunning) {
             console.log("等待中。。。");
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 5));
         }
         this.taskRunning = true;
     }
@@ -160,8 +153,13 @@ class ModBusRTUMaster {
         let parse_Step = 0;
         let index = 0;
         let result = {};
+        let parse_timeout = false;
+        let parse_timer = setTimeout(() => {
+            parse_timeout = true;
+            result = { "error": "timeout" };
+        }, 100);
 
-        while (true) {
+        while (!parse_timeout) {
             // 读取站号、功能码
             if (parse_Step === 0 && this.dataBuffer.length >= 2 + index) {
                 result["slave"] = this.dataBuffer[index];
@@ -199,7 +197,7 @@ class ModBusRTUMaster {
 
             // 读取数据
             if (parse_Step === 4 && this.dataBuffer.length >= 4 + index) {
-                result["value"] = this.dataBuffer.splice(index, 4);
+                result["value"] = this.dataBuffer.slice(index, index + 4);
                 index += 4;
 
                 parse_Step = 20;
@@ -207,7 +205,7 @@ class ModBusRTUMaster {
 
             // 根据长度读数据
             if (parse_Step === 10 && this.dataBuffer.length >= result["byteCount"] + index) {
-                result["value"] = this.dataBuffer.splice(index, result["byteCount"]);
+                result["value"] = this.dataBuffer.slice(index, index + result["byteCount"]);
                 index += result["byteCount"];
 
                 parse_Step = 20;
@@ -215,7 +213,7 @@ class ModBusRTUMaster {
 
             // crc校验
             if (parse_Step === 20 && this.dataBuffer.length >= 2 + index) {
-                if (extend.arrayEqual(this.crc(this.dataBuffer.splice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
+                if (extend.arrayEqual(this.crc(this.dataBuffer.slice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
                     break;
                 } else {
                     throw new Error("crc校验失败");
@@ -225,7 +223,10 @@ class ModBusRTUMaster {
             await new Promise(resolve => setTimeout(resolve, 0));
         }
 
+        clearTimeout(parse_timer);
+
         this.onMdParseCallback(Date.now(), result);
+
         return result;
     }
 
