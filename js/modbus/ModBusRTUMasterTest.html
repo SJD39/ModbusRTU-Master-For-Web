@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ModBusRTUMasterTest</title>
 
+    <script src="../extend/BitConvert.js"></script>
     <script src="./ModBusRTUMaster.js"></script>
 </head>
 
@@ -41,40 +42,61 @@
     </select>
 
     <button id="open_port_btn">打开串口</button>
-</body>
-<script>
-    var serialPort = null;
-    var modBusRTUMaster = new ModBusRTUMaster();
 
-    // 选择串口
-    sel_port_btn.addEventListener("click", async () => {
-        try {
-            serialPort = await navigator.serial.requestPort();
-        } catch (e) {
-            console.log(e);
-            return;
-        }
-        console.log(serialPort);
-    });
+    <script>
+        var serialPort = null;
+        var modBusRTUMaster = new ModBusRTUMaster();
 
-    // 打开串口
-    open_port_btn.addEventListener("click", async () => {
-        let port_options = {
-            baudRate: Number(baud_rate_select.value),
-            dataBits: Number(data_bits_select.value),
-            stopBits: Number(stop_bits_select.value),
-            parity: parity_select.value,
-            bufferSize: 1024,
+        // 选择串口
+        sel_port_btn.addEventListener("click", async () => {
+            try {
+                serialPort = await navigator.serial.requestPort();
+            } catch (e) {
+                return;
+            }
+        });
+
+        // 打开串口
+        open_port_btn.addEventListener("click", async () => {
+            let port_options = {
+                baudRate: Number(baud_rate_select.value),
+                dataBits: Number(data_bits_select.value),
+                stopBits: Number(stop_bits_select.value),
+                parity: parity_select.value,
+                bufferSize: 1024,
+            };
+            await serialPort.open(port_options);
+
+            modBusRTUMaster.startMaster(serialPort);
+        });
+
+        // 监听读取
+        modBusRTUMaster.onReadCallback = (timestamp, data) => {
+            console.log("读：" + timestamp, data);
         };
-        await serialPort.open(port_options);
-        
-        modBusRTUMaster.startMaster(serialPort);
-    });
 
-    // 读取串口数据
-    modBusRTUMaster.onReadCallback = function (timestamp, data) {
-        console.log(timestamp, data);
-    }
-</script>
+        // 监听写入
+        modBusRTUMaster.onWriteCallback = (timestamp, data) => {
+            console.log("写：" + timestamp, data);
+        };
+    </script>
+
+    <!-- 功能测试 -->
+    <h1>功能测试：</h1>
+    <h2>读线圈</h2>
+    <input type="number" id="read_coil_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="read_coil_addr" placeholder="请输入起始地址" />
+    <input type="number" id="read_coil_num" placeholder="请输入读取数量" />
+    <button id="read_coil_btn">读线圈</button>
+    <span id="read_coil_result"></span>
+    <script>
+        read_coil_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.readCoils(read_coil_slave_id.value, read_coil_addr.value, read_coil_num.value);
+            read_coil_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+</body>
+
 
 </html>

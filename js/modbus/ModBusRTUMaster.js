@@ -23,6 +23,19 @@ class ModBusRTUMaster {
         this.run();
     }
 
+    // 数组对比
+    arrayEqual(arr1, arr2) {
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // 主循环
     async run() {
         while (true) {
@@ -38,6 +51,9 @@ class ModBusRTUMaster {
     // 启动主站
     async startMaster(port) {
         try {
+            if (!port || !port.readable || !port.writable) {
+                throw new Error('串口不可用');
+            }
             this.port = port;
         } catch (e) {
             throw new Error(`串口初始化失败:${e}`);
@@ -102,7 +118,7 @@ class ModBusRTUMaster {
             this.build_Command({ "id": id, "fun": 3, "addr": addr, "num": len }));
     }
     // 04 读输入寄存器
-    async ReadInputRegisters(id, addr, len) {
+    async readInputRegisters(id, addr, len) {
         return await this.action(
             this.build_Command({ "id": id, "fun": 4, "addr": addr, "num": len }));
     }
@@ -112,7 +128,7 @@ class ModBusRTUMaster {
             this.build_Command({ "id": id, "fun": 5, "addr": addr, "val": value ? 0xff00 : 0 }));
     }
     // 06 写单个保持寄存器
-    async WriteSingleRegister(id, addr, value) {
+    async writeSingleRegister(id, addr, value) {
         return await this.action(
             this.build_Command({ "id": id, "fun": 6, "addr": addr, "val": value }));
     }
@@ -127,6 +143,11 @@ class ModBusRTUMaster {
             this.build_Command({ "id": id, "fun": 16, "addr": addr, "num": len, "val": values }));
     }
     async action(data) {
+        if (!this.working) {
+            throw new Error("主站未启动");
+        }
+
+        // 等待上一次任务完成
         await this.busy();
         this.dataBuffer = [];
 
@@ -134,7 +155,14 @@ class ModBusRTUMaster {
         await this.writeSerial(data);
 
         // 读返回值
-        let result = await this.parse_data();
+        let result;
+        try {
+            result = await this.parse_data();
+        } catch (e) {
+            throw new Error(`串口读取失败:${e}`);
+        } finally {
+            this.taskRunning = false;
+        }
 
         return result;
     }
@@ -149,17 +177,18 @@ class ModBusRTUMaster {
     }
 
     // MD解析
-    async parse_data() {
+    async parse_data(timeout = 100) {
+        const startTime = Date.now();
         let parse_Step = 0;
         let index = 0;
         let result = {};
-        let parse_timeout = false;
-        let parse_timer = setTimeout(() => {
-            parse_timeout = true;
-            result = { "error": "timeout" };
-        }, 100);
 
-        while (!parse_timeout) {
+        while (true) {
+            // 判断超时
+            if (Date.now() - startTime > timeout) {
+                throw new Error("timeout");
+            }
+
             // 读取站号、功能码
             if (parse_Step === 0 && this.dataBuffer.length >= 2 + index) {
                 result["slave"] = this.dataBuffer[index];
@@ -213,17 +242,15 @@ class ModBusRTUMaster {
 
             // crc校验
             if (parse_Step === 20 && this.dataBuffer.length >= 2 + index) {
-                if (extend.arrayEqual(this.crc(this.dataBuffer.slice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
+                if (this.arrayEqual(this.crc(this.dataBuffer.slice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
                     break;
                 } else {
                     throw new Error("crc校验失败");
                 }
             }
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 5));
         }
-
-        clearTimeout(parse_timer);
 
         this.onMdParseCallback(Date.now(), result);
 
