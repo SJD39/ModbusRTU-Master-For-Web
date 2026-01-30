@@ -3,17 +3,12 @@ class ModBusRTUMaster {
         this.working = false;
         this.taskRunning = false;
         this.port = null;
-        this.port_options = null;
         this.reader;
         this.writer;
 
-        this.funCodes = [1, 2, 3, 4, 5, 6, 15, 16];
-
         // md解析
         this.dataBuffer = [];
-        this.mdOriginal = [];
         this.byteOrder = 'little-endian';
-        this.timer;
 
         this.onWriteCallback = () => { };
         this.onReadCallback = () => { };
@@ -25,22 +20,14 @@ class ModBusRTUMaster {
 
     // 数组对比
     arrayEqual(arr1, arr2) {
-        if (arr1.length !== arr2.length) {
-            return false;
-        }
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] !== arr2[i]) {
-                return false;
-            }
-        }
-        return true;
+        return arr1.length === arr2.length && arr1.every((val, i) => val === arr2[i]);
     }
 
     // 主循环
     async run() {
         while (true) {
             if (this.working === false) {
-                await new Promise(resolve => setTimeout(resolve, 0));
+                await new Promise(resolve => setTimeout(resolve, 5));
                 continue;
             }
 
@@ -50,14 +37,11 @@ class ModBusRTUMaster {
 
     // 启动主站
     async startMaster(port) {
-        try {
-            if (!port || !port.readable || !port.writable) {
-                throw new Error('串口不可用');
-            }
-            this.port = port;
-        } catch (e) {
-            throw new Error(`串口初始化失败:${e}`);
+        if (!port || !port.readable || !port.writable) {
+            throw new Error('串口不可用');
         }
+        this.port = port;
+
         this.working = true;
 
         return;
@@ -104,23 +88,27 @@ class ModBusRTUMaster {
 
     // 01 读线圈
     async readCoils(id, addr, len) {
-        return await this.action(
+        let result = await this.action(
             this.build_Command({ "id": id, "fun": 1, "addr": addr, "num": len }));
+        return this.bytesToBoolArray(result.value, len);
     }
     // 02 读离散
     async readDiscrete(id, addr, len) {
-        return await this.action(
+        let result = await this.action(
             this.build_Command({ "id": id, "fun": 2, "addr": addr, "num": len }));
+        return this.bytesToBoolArray(result.value, len);
     }
     // 03 读保持寄存器
     async readHoldingRegisters(id, addr, len) {
-        return await this.action(
+        let result = await this.action(
             this.build_Command({ "id": id, "fun": 3, "addr": addr, "num": len }));
+        return this.bytesToUint16Array(result.value);
     }
     // 04 读输入寄存器
     async readInputRegisters(id, addr, len) {
-        return await this.action(
+        let result = await this.action(
             this.build_Command({ "id": id, "fun": 4, "addr": addr, "num": len }));
+        return this.bytesToUint16Array(result.value);
     }
     // 05 写单个线圈
     async writeSingleCoil(id, addr, value) {
@@ -189,72 +177,73 @@ class ModBusRTUMaster {
                 throw new Error("timeout");
             }
 
-            // 读取站号、功能码
-            if (parse_Step === 0 && this.dataBuffer.length >= 2 + index) {
-                result["slave"] = this.dataBuffer[index];
-                index++;
+            switch (parse_Step) {
+                case 0:
+                    if (this.dataBuffer.length >= 2 + index) {
+                        result["slave"] = this.dataBuffer[index];
+                        index++;
 
-                result["funCode"] = this.dataBuffer[index];
-                index++;
+                        result["funCode"] = this.dataBuffer[index];
+                        index++;
 
-                if (result["funCode"] > 128) {
-                    parse_Step = 2;    // 读错误码
-                } else if ([1, 2, 3, 4].includes(result["funCode"])) {
-                    parse_Step = 3;    // 有数据长度
-                } else if ([5, 6, 15, 16].includes(result["funCode"])) {
-                    parse_Step = 4;    // 无数据长度
-                } else {
-                    throw new Error(`未知的功能码：${result["funCode"].toString(16).padStart(2, '0')}`);
-                }
-            }
-
-            // 读取错误码
-            if (parse_Step === 2 && this.dataBuffer.length >= 1 + index) {
-                result["exceptionCode"] = this.dataBuffer[index];
-                index++;
-
-                parse_Step = 20;
-            }
-
-            // 读取数据长度
-            if (parse_Step === 3 && this.dataBuffer.length >= 1 + index) {
-                result["byteCount"] = this.dataBuffer[index];
-                index++;
-
-                parse_Step = 10;
-            }
-
-            // 读取数据
-            if (parse_Step === 4 && this.dataBuffer.length >= 4 + index) {
-                result["value"] = this.dataBuffer.slice(index, index + 4);
-                index += 4;
-
-                parse_Step = 20;
-            }
-
-            // 根据长度读数据
-            if (parse_Step === 10 && this.dataBuffer.length >= result["byteCount"] + index) {
-                result["value"] = this.dataBuffer.slice(index, index + result["byteCount"]);
-                index += result["byteCount"];
-
-                parse_Step = 20;
-            }
-
-            // crc校验
-            if (parse_Step === 20 && this.dataBuffer.length >= 2 + index) {
-                if (this.arrayEqual(this.crc(this.dataBuffer.slice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
+                        if (result["funCode"] > 128) {
+                            parse_Step = 2;
+                        } else if ([1, 2, 3, 4].includes(result["funCode"])) {
+                            parse_Step = 3;
+                        } else if ([5, 6, 15, 16].includes(result["funCode"])) {
+                            parse_Step = 4;
+                        } else {
+                            throw new Error(`未知的功能码：${result["funCode"].toString(16).padStart(2, '0')}`);
+                        }
+                    }
                     break;
-                } else {
-                    throw new Error("crc校验失败");
-                }
+
+                case 2:
+                    if (this.dataBuffer.length >= 1 + index) {
+                        result["exceptionCode"] = this.dataBuffer[index];
+                        index++;
+                        parse_Step = 20;
+                    }
+                    break;
+
+                case 3:
+                    if (this.dataBuffer.length >= 1 + index) {
+                        result["byteCount"] = this.dataBuffer[index];
+                        index++;
+                        parse_Step = 10;
+                    }
+                    break;
+
+                case 4:
+                    if (this.dataBuffer.length >= 4 + index) {
+                        result["value"] = this.dataBuffer.slice(index, index + 4);
+                        index += 4;
+                        parse_Step = 20;
+                    }
+                    break;
+
+                case 10:
+                    if (this.dataBuffer.length >= result["byteCount"] + index) {
+                        result["value"] = this.dataBuffer.slice(index, index + result["byteCount"]);
+                        index += result["byteCount"];
+                        parse_Step = 20;
+                    }
+                    break;
+
+                case 20:
+                    if (this.dataBuffer.length >= 2 + index) {
+                        if (this.arrayEqual(this.crc(this.dataBuffer.slice(0, index)), [this.dataBuffer[index], this.dataBuffer[index + 1]])) {
+                            this.onMdParseCallback(Date.now(), result);
+                            return result;
+                        } else {
+                            throw new Error("crc校验失败");
+                        }
+                    }
+                    break;
             }
 
             await new Promise(resolve => setTimeout(resolve, 5));
         }
-
-        this.onMdParseCallback(Date.now(), result);
-
-        return result;
     }
 
     // 生成modbus指令
@@ -266,7 +255,7 @@ class ModBusRTUMaster {
             command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF];
         } else if ([5, 6].includes(param.fun)) {
             // 写单个线圈、写单个寄存器
-            command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.val >> 8, param.val & 0xFF]
+            command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.val >> 8, param.val & 0xFF];
         } else if ([15].includes(param.fun)) {
             // 写多个线圈
             command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF, Math.ceil(param.num / 8)];
@@ -274,7 +263,7 @@ class ModBusRTUMaster {
         } else if ([16].includes(param.fun)) {
             // 写多个寄存器
             command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF, param.num * 2];
-            const buffer = new ArrayBuffer(16);
+            const buffer = new ArrayBuffer(2);
             const view = new DataView(buffer);
             for (let i = 0; i < param.num; i++) {
                 view.setUint16(0, param.val[i]);
@@ -284,6 +273,32 @@ class ModBusRTUMaster {
 
         return new Uint8Array([...command, ...this.crc(command)]);
     }
+
+    // 字节数组转bool数组
+    bytesToBoolArray(bytes, len) {
+        let boolArray = [];
+        if (bytes) {
+            for (let i = 0; i < len; i++) {
+                let byteIndex = Math.floor(i / 8);
+                let bitIndex = i % 8;
+                boolArray.push((bytes[byteIndex] & (1 << bitIndex)) !== 0);
+            }
+        }
+        return boolArray;
+    }
+
+    // 字节数组转16位数组
+    bytesToUint16Array(bytes) {
+        let uint16Array = [];
+        if (bytes) {
+            for (let i = 0; i < bytes.length; i += 2) {
+                let value = (bytes[i] << 8) | bytes[i + 1];
+                uint16Array.push(value);
+            }
+        }
+        return uint16Array;
+    }
+
     // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;
@@ -304,7 +319,7 @@ class ModBusRTUMaster {
     hexStrToArray(str) {
         let result = [];
         for (let i = 0; i < str.length; i += 2) {
-            result.push(parseInt(str.substr(i, 2), 16));
+            result.push(parseInt(str.substring(i, i + 2), 16));
         }
         return result;
     }

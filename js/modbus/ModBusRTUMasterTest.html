@@ -96,6 +96,111 @@
             console.log(data);
         });
     </script>
+
+    <h2>读离散</h2>
+    <input type="number" id="read_discrete_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="read_discrete_addr" placeholder="请输入起始地址" />
+    <input type="number" id="read_discrete_num" placeholder="请输入读取数量" />
+    <button id="read_discrete_btn">读离散</button>
+    <span id="read_discrete_result"></span>
+    <script>
+        read_discrete_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.readDiscrete(read_discrete_slave_id.value, read_discrete_addr.value, read_discrete_num.value);
+            read_discrete_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>读保持寄存器</h2>
+    <input type="number" id="read_holding_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="read_holding_addr" placeholder="请输入起始地址" />
+    <input type="number" id="read_holding_num" placeholder="请输入读取数量" />
+    <button id="read_holding_btn">读保持寄存器</button>
+    <span id="read_holding_result"></span>
+    <script>
+        read_holding_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.readHoldingRegisters(read_holding_slave_id.value, read_holding_addr.value, read_holding_num.value);
+            read_holding_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>读输入寄存器</h2>
+    <input type="number" id="read_input_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="read_input_addr" placeholder="请输入起始地址" />
+    <input type="number" id="read_input_num" placeholder="请输入读取数量" />
+    <button id="read_input_btn">读输入寄存器</button>
+    <span id="read_input_result"></span>
+    <script>
+        read_input_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.readInputRegisters(read_input_slave_id.value, read_input_addr.value, read_input_num.value);
+            read_input_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>写单个线圈</h2>
+    <input type="number" id="write_single_coil_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="write_single_coil_addr" placeholder="请输入线圈地址" />
+    <select id="write_single_coil_value">
+        <option value="true">ON</option>
+        <option value="false">OFF</option>
+    </select>
+    <button id="write_single_coil_btn">写单个线圈</button>
+    <span id="write_single_coil_result"></span>
+    <script>
+        write_single_coil_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.writeSingleCoil(write_single_coil_slave_id.value, write_single_coil_addr.value, write_single_coil_value.value === "true");
+            write_single_coil_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>写单个保持寄存器</h2>
+    <input type="number" id="write_single_reg_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="write_single_reg_addr" placeholder="请输入寄存器地址" />
+    <input type="number" id="write_single_reg_value" placeholder="请输入值" />
+    <button id="write_single_reg_btn">写单个保持寄存器</button>
+    <span id="write_single_reg_result"></span>
+    <script>
+        write_single_reg_btn.addEventListener("click", async () => {
+            let data = await modBusRTUMaster.writeSingleRegister(write_single_reg_slave_id.value, write_single_reg_addr.value, write_single_reg_value.value);
+            write_single_reg_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>写多个线圈</h2>
+    <input type="number" id="write_multi_coil_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="write_multi_coil_addr" placeholder="请输入起始地址" />
+    <input type="number" id="write_multi_coil_num" placeholder="请输入线圈数量" />
+    <input type="text" id="write_multi_coil_values" placeholder="请输入值(逗号分隔,如:1,0,1,0)" />
+    <button id="write_multi_coil_btn">写多个线圈</button>
+    <span id="write_multi_coil_result"></span>
+    <script>
+        write_multi_coil_btn.addEventListener("click", async () => {
+            let values = write_multi_coil_values.value.split(",").map(v => v.trim() === "1" || v.trim().toLowerCase() === "true");
+            let data = await modBusRTUMaster.writeMultipleCoils(write_multi_coil_slave_id.value, write_multi_coil_addr.value, write_multi_coil_num.value, values);
+            write_multi_coil_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
+
+    <h2>写多个寄存器</h2>
+    <input type="number" id="write_multi_reg_slave_id" placeholder="请输入从站ID" />
+    <input type="number" id="write_multi_reg_addr" placeholder="请输入起始地址" />
+    <input type="number" id="write_multi_reg_num" placeholder="请输入寄存器数量" />
+    <input type="text" id="write_multi_reg_values" placeholder="请输入值(逗号分隔,如:100,200,300)" />
+    <button id="write_multi_reg_btn">写多个寄存器</button>
+    <span id="write_multi_reg_result"></span>
+    <script>
+        write_multi_reg_btn.addEventListener("click", async () => {
+            let values = write_multi_reg_values.value.split(",").map(v => parseInt(v.trim()));
+            let data = await modBusRTUMaster.writeMultipleRegisters(write_multi_reg_slave_id.value, write_multi_reg_addr.value, write_multi_reg_num.value, values);
+            write_multi_reg_result.innerHTML = data;
+            console.log(data);
+        });
+    </script>
 </body>
 
 
