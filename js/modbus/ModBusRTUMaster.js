@@ -26,7 +26,7 @@ class ModBusRTUMaster {
     // 主循环
     async run() {
         while (true) {
-            if (this.working === false) {
+            if (!this.working) {
                 await new Promise(resolve => setTimeout(resolve, 5));
                 continue;
             }
@@ -43,13 +43,10 @@ class ModBusRTUMaster {
         this.port = port;
 
         this.working = true;
-
-        return;
     }
 
     // 停止主站
     async stopMaster() {
-        // 停止主站
         this.working = false;
 
         this.dataBuffer = [];
@@ -57,19 +54,16 @@ class ModBusRTUMaster {
 
     // 串口读取
     async serialRead() {
-        let read_result;
-
         this.reader = this.port.readable.getReader();
         try {
-            read_result = await this.reader.read();
+            const { value } = await this.reader.read();
+            this.dataBuffer.push(...value);
+            this.onReadCallback(Date.now(), value);
         } catch (e) {
             throw new Error(`串口读取失败:${e}`);
         } finally {
             await this.reader.releaseLock();
         }
-
-        this.dataBuffer.push(...read_result.value);
-        this.onReadCallback(Date.now(), read_result.value);
     }
 
     // 串口写入
@@ -77,8 +71,8 @@ class ModBusRTUMaster {
         this.writer = this.port.writable.getWriter();
         try {
             await this.writer.write(data);
-        } catch (error) {
-            throw new Error(`串口写入失败:${error}`);
+        } catch (e) {
+            throw new Error(`串口写入失败:${e}`);
         } finally {
             await this.writer.releaseLock();
         }
@@ -258,16 +252,15 @@ class ModBusRTUMaster {
             command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.val >> 8, param.val & 0xFF];
         } else if ([15].includes(param.fun)) {
             // 写多个线圈
-            command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF, Math.ceil(param.num / 8)];
-            command.push(...param.val);
+            let byteCount = Math.ceil(param.num / 8);
+            command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF, byteCount];
+            let bytes = this.boolArrayToBytes(param.val, param.num);
+            command.push(...bytes);
         } else if ([16].includes(param.fun)) {
             // 写多个寄存器
             command = [param.id, param.fun, param.addr >> 8, param.addr & 0xFF, param.num >> 8, param.num & 0xFF, param.num * 2];
-            const buffer = new ArrayBuffer(2);
-            const view = new DataView(buffer);
             for (let i = 0; i < param.num; i++) {
-                view.setUint16(0, param.val[i]);
-                command.push(view.getUint8(0), view.getUint8(1));
+                command.push(param.val[i] >> 8, param.val[i] & 0xFF);
             }
         }
 
@@ -290,31 +283,40 @@ class ModBusRTUMaster {
     // 字节数组转16位数组
     bytesToUint16Array(bytes) {
         let uint16Array = [];
-        if (bytes) {
-            for (let i = 0; i < bytes.length; i += 2) {
-                let value = (bytes[i] << 8) | bytes[i + 1];
-                uint16Array.push(value);
-            }
+        for (let i = 0; i < bytes.length; i += 2) {
+            let value = (bytes[i] << 8) | bytes[i + 1];
+            uint16Array.push(value);
         }
         return uint16Array;
+    }
+
+    // bool数组转字节数组
+    boolArrayToBytes(boolArray, len) {
+        let bytes = [];
+        for (let i = 0; i < len; i += 8) {
+            let byte = 0;
+            for (let j = 0; j < 8 && i + j < len; j++) {
+                if (boolArray[i + j]) {
+                    byte |= (1 << j);
+                }
+            }
+            bytes.push(byte);
+        }
+        return bytes;
     }
 
     // crc校验生成
     crc(data) {
         let crcValue = 0xFFFF;
         for (let i = 0; i < data.length; i++) {
-            crcValue = (crcValue & 0xFFFF) ^ data[i];
-            for (let ii = 0; ii < 8; ii++) {
-                if (crcValue & 0x0001) {
-                    crcValue = crcValue >> 1;
-                    crcValue = crcValue ^ 0xA001;
-                } else {
-                    crcValue = crcValue >> 1;
-                }
+            crcValue ^= data[i];
+            for (let bit = 0; bit < 8; bit++) {
+                crcValue = (crcValue & 1) ? (crcValue >> 1) ^ 0xA001 : crcValue >> 1;
             }
         }
         return [crcValue & 0xFF, crcValue >> 8];
     }
+    
     // 十六进制字符串转十进制数组
     hexStrToArray(str) {
         let result = [];
